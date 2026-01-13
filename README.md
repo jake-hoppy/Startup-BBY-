@@ -27,7 +27,7 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 ### Elevator pitch
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+Imagine a social feed, but instead of posts and likes, it’s homework deadlines, study plans, and shared progress. Our platform lets you and your friends track assignments together in one place—see what’s due, who’s working on what, and when it’s time to grind. By turning homework into a shared, social experience, we reduce procrastination, increase accountability, and make studying feel less isolating. It’s not another planner—it’s a homework network built for how students actually work together.
 
 ### Design
 
