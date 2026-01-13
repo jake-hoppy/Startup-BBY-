@@ -2,9 +2,7 @@
 
 [My Notes](notes.md)
 
-edit to check if commit works
-
-A brief description of the application here. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+Homework Together is a social homework tracker that lets friends and classmates see upcoming assignments, share progress, and stay accountable together. Instead of juggling multiple planners and apps, everything lives in one shared, social space designed for how students actually work.
 
 > [!NOTE]
 > This is a template for your startup application. You must modify this `README.md` file for each phase of your development. You only need to fill in the section for each deliverable when that deliverable is submitted in Canvas. Without completing the section for a deliverable, the TA will not know what to look for when grading your submission. Feel free to add additional information to each deliverable description, but make sure you at least have the list of rubric items and a description of what you did for each item.
@@ -19,11 +17,11 @@ A brief description of the application here. Lorem ipsum dolor sit amet, consect
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] Proper use of Markdown
-- [ ] A concise and compelling elevator pitch
-- [ ] Description of key features
-- [ ] Description of how you will use each technology
-- [ ] One or more rough sketches of your application. Images must be embedded in this file using Markdown image references.
+- [x] Proper use of Markdown
+- [x] A concise and compelling elevator pitch
+- [x] Description of key features
+- [x] Description of how you will use each technology
+- [x] One or more rough sketches of your application. Images must be embedded in this file using Markdown image references.
 
 ### Elevator pitch
 
@@ -31,33 +29,37 @@ Imagine a social feed, but instead of posts and likes, it’s homework deadlines
 
 ### Design
 
-![Design image](placeholder.png)
+![Design image](HomeworkTogether.png)
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+The application is designed around a shared homework feed that feels similar to a social media timeline. After logging in, users see an organized schedule of assignments imported from Learning Suite, sorted by due date. Friends’ activity (studying, completing assignments) appears alongside the schedule to promote accountability and collaboration. Users can interact with assignments by marking progress, starting study sessions, or completing tasks.
 
 ```mermaid
 sequenceDiagram
-    actor You
-    actor Website
-    You->>Website: Replace this with your design
+    actor User
+    participant App
+    User->>App: Log in
+    App->>User: Display shared homework feed
+    User->>App: Add or update assignment
+    App->>User: Sync updates with friends
 ```
 
 ### Key features
 
-- Describe your key feature
-- Describe your key feature
-- Describe your key feature
+- Import and organize assignments from Learning Suite into a single, clear schedule
+- Social homework feed showing friends’ study activity and completed assignments
+- Interactive assignment tracking (not started, studying, completed)
+- Real-time updates so friends can see progress instantly
 
 ### Technologies
 
 I am going to use the required technologies in the following ways.
 
-- **HTML** - Description here
-- **CSS** - Description here
-- **React** - Description here
-- **Service** - Description here
-- **DB/Login** - Description here
-- **WebSocket** - Description here
+- **HTML** - Structure the core pages of the site, including login, homework dashboard, and social feed layout.
+- **CSS** - Style the application to resemble a modern social media platform, with a clean design
+- **React** - Build reusable components for assignments, feeds, and friend activity, and manage dynamic state as users interact with the app.
+- **Service** - Provide backend endpoints for importing assignments, updating progress, and managing social interactions as well as login information to maintain account information
+- **DB/Login** - Store user accounts, assignments, and friend relationships securely, with authentication to ensure private data stays protected.
+- **WebSocket** - Enable real-time updates so when a user starts studying or completes an assignment, their friends see it immediately.
 
 ## 🚀 AWS deliverable
 
