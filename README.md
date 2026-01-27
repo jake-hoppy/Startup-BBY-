@@ -72,8 +72,8 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
 - [x] **HTML pages** - I am using 4 seperate HTML pages one is feed.html for the social network part, index.html to login, home.html as sort of a dashboard, toDO.html to see what you need to do going forward.
-- [ ] **Proper HTML element usage** - I did not complete this part of the deliverable.
-- [ ] **Links** - I did not complete this part of the deliverable.
+- [x] **Proper HTML element usage** - I am using headers and footers as well as taking advantage of the style section with backgrounds and whatnot. I eventually reverted and connected to a CSS style sheet for future deliverables
+- [x] **Links** - I linked my 4 html pages across the website so you can navigate between pages.
 - [ ] **Text** - I did not complete this part of the deliverable.
 - [ ] **3rd party API placeholder** - I did not complete this part of the deliverable.
 - [ ] **Images** - I did not complete this part of the deliverable.
