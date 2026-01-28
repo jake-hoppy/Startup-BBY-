@@ -21,9 +21,122 @@
   </header>
 
   <main>
-    <h1>To Do</h1>
+    <div class="todo-layout">
+      <section class="todo-main">
+        <h1>To Do</h1>
+
+        <section class="todo-filters">
+          <h2>Class Filter</h2>
+          <div class="filter-buttons">
+            <button>All</button>
+            <button>CS 260</button>
+            <button>CS 224</button>
+            <button>Algorithms</button>
+          </div>
+        </section>
+
+        <section class="calendar-section">
+          <h2>Calendar</h2>
+
+          <div class="calendar-card">
+            <div class="calendar-header">
+              <button aria-label="Previous month">‹</button>
+              <h3>January 2026</h3>
+              <button aria-label="Next month">›</button>
+            </div>
+
+            <div class="calendar-grid">
+              <div class="calendar-day calendar-day-label">Sun</div>
+              <div class="calendar-day calendar-day-label">Mon</div>
+              <div class="calendar-day calendar-day-label">Tue</div>
+              <div class="calendar-day calendar-day-label">Wed</div>
+              <div class="calendar-day calendar-day-label">Thu</div>
+              <div class="calendar-day calendar-day-label">Fri</div>
+              <div class="calendar-day calendar-day-label">Sat</div>
+
+              <!-- Week 1 -->
+              <div class="calendar-day calendar-day-empty"></div>
+              <div class="calendar-day calendar-day-empty"></div>
+              <div class="calendar-day calendar-day-empty"></div>
+              <div class="calendar-day calendar-day-empty"></div>
+              <div class="calendar-day calendar-day-empty"></div>
+              <div class="calendar-day">1</div>
+              <div class="calendar-day">2</div>
+
+              <!-- Week 2 -->
+              <div class="calendar-day">3</div>
+              <div class="calendar-day">4</div>
+              <div class="calendar-day">5</div>
+              <div class="calendar-day">6</div>
+              <div class="calendar-day">7</div>
+              <div class="calendar-day">8</div>
+              <div class="calendar-day">9</div>
+
+              <!-- Week 3 -->
+              <div class="calendar-day">10</div>
+              <div class="calendar-day">11</div>
+              <div class="calendar-day">12</div>
+              <div class="calendar-day">13</div>
+              <div class="calendar-day">14</div>
+              <div class="calendar-day">15</div>
+              <div class="calendar-day">16</div>
+
+              <!-- Week 4 -->
+              <div class="calendar-day">17</div>
+              <div class="calendar-day">18</div>
+              <div class="calendar-day">19</div>
+              <div class="calendar-day">20</div>
+              <div class="calendar-day">21</div>
+              <div class="calendar-day">22</div>
+              <div class="calendar-day">23</div>
+
+              <!-- Week 5 -->
+              <div class="calendar-day">24</div>
+              <div class="calendar-day">25</div>
+              <div class="calendar-day">26</div>
+              <div class="calendar-day">27</div>
+              <div class="calendar-day">28</div>
+              <div class="calendar-day">29</div>
+              <div class="calendar-day">30</div>
+
+              <!-- Week 6 -->
+              <div class="calendar-day">31</div>
+              <div class="calendar-day calendar-day-empty"></div>
+              <div class="calendar-day calendar-day-empty"></div>
+              <div class="calendar-day calendar-day-empty"></div>
+              <div class="calendar-day calendar-day-empty"></div>
+              <div class="calendar-day calendar-day-empty"></div>
+              <div class="calendar-day calendar-day-empty"></div>
+            </div>
+
+            <div class="calendar-legend">
+              <p><strong>Legend:</strong> 📝 Assignment · 🧪 Test</p>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <aside class="todo-sidebar">
+        <section class="sidebar-card">
+          <h2>Upcoming Assignments</h2>
+          <ul class="upcoming-list">
+            <li><strong>CS 260:</strong> Project Checkpoint – Friday</li>
+            <li><strong>CS 224:</strong> Lab 3 – Friday</li>
+            <li><strong>Algorithms:</strong> Problem Set 2 – Monday</li>
+          </ul>
+        </section>
+
+        <section class="sidebar-card">
+          <h2>Upcoming Tests</h2>
+          <ul class="upcoming-list">
+            <li><strong>CS 224:</strong> Quiz 1 – Thursday</li>
+            <li><strong>Algorithms:</strong> Midterm Review – Next week</li>
+          </ul>
+        </section>
+      </aside>
+    </div>
   </main>
-  <footer class="site-footer"></footer>
+  <footer class="site-footer">
     <p><strong>Sociallearning</strong></p>
     <p>CS 260 – Web Programming</p>
     <p>Jake Hopkins</p>
