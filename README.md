@@ -74,12 +74,12 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 - [x] **HTML pages** - I am using 4 seperate HTML pages one is feed.html for the social network part, index.html to login, home.html as sort of a dashboard, toDO.html to see what you need to do going forward.
 - [x] **Proper HTML element usage** - I am using headers and footers as well as taking advantage of the style section with backgrounds and whatnot. I eventually reverted and connected to a CSS style sheet for future deliverables
 - [x] **Links** - I linked my 4 html pages across the website so you can navigate between pages.
-- [ ] **Text** - I did not complete this part of the deliverable.
-- [ ] **3rd party API placeholder** - I did not complete this part of the deliverable.
-- [ ] **Images** - I did not complete this part of the deliverable.
-- [ ] **Login placeholder** - I did not complete this part of the deliverable.
-- [ ] **DB data placeholder** - I did not complete this part of the deliverable.
-- [ ] **WebSocket placeholder** - I did not complete this part of the deliverable.
+- [x] **Text** - Instruction in places to help guide user as well as place holders.
+- [x] **3rd party API placeholder** - (Place holder with commented out intention) there is a section in the feed that will generate study tips for those in the feed.
+- [x] **Images** - I do have image place holders that will eventually be a logo that I will create myself for the headers of the pages
+- [x] **Login placeholder** - I completed this even including regex logic for valid emails.
+- [x] **DB data placeholder** - This is found on the ToDo list with a database call for assignments as well as a possible database call to assignments that your friends want you to see.
+- [x] **WebSocket placeholder** - Live updates for the social media part of social learning where posts and updates can be seen live.
 
 ## 🚀 CSS deliverable
 
