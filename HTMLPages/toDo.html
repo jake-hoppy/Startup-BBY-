@@ -7,10 +7,10 @@
 <body>
   <header>
     <nav>
-        <div class="logo-placeholder">
-            <!-- Logo placeholder -->
-            <img src="#" alt="Logo" />
-          </div>
+      <div class="logo-placeholder">
+        <!-- Logo placeholder -->
+        <img src="#" alt="Logo" />
+      </div>
       <ul>
         <li><a href="home.html">Home</a></li>
         <li><a href="feed.html">Feed</a></li>
@@ -117,6 +117,22 @@
       </section>
 
       <aside class="todo-sidebar">
+        <section class="sidebar-card db-placeholder">
+          <h2>Assignments loaded from database</h2>
+
+          <!-- DB placeholder: this div is intended to be filled with data from the backend/database -->
+          <div id="db-assignments">Loading assignments…</div>
+
+          <!-- Example (not active yet):
+          <script>
+            // Mock DB data
+            // const db = { assignments: ["CS 260: Project Checkpoint – Friday", "Alex: CS 224 Lab 3 – Friday"] };
+            // document.getElementById("db-assignments").innerHTML =
+            //   "<ul>" + db.assignments.map(a => `<li>${a}</li>`).join("") + "</ul>";
+          </script>
+          -->
+        </section>
+
         <section class="sidebar-card">
           <h2>Upcoming Assignments</h2>
           <ul class="upcoming-list">
@@ -136,6 +152,7 @@
       </aside>
     </div>
   </main>
+
   <footer class="site-footer">
     <p><strong>Sociallearning</strong></p>
     <p>CS 260 – Web Programming</p>

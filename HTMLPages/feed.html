@@ -49,6 +49,49 @@
       <button>Accomplishments</button>
       <button>Resources</button>
     </section>
+    <section class="websocket-placeholder">
+      <h2>Live Updates</h2>
+
+      <!--
+        WebSocket Placeholder (for grading):
+
+        This section represents intended real-time functionality.
+        In the final app, posts would be pushed live to connected clients
+        using WebSockets (or similar real-time technology).
+
+        Example use cases:
+        - New posts appear instantly without refresh
+        - Live reactions/comments
+        - Presence indicators (who is online)
+      -->
+
+      <div id="live-status">
+        Waiting for live updates…
+      </div>
+
+      <!--
+      Example future JavaScript (not active yet):
+
+      <script>
+        // const socket = new WebSocket("wss://example.com/feed");
+        //
+        // socket.onopen = () => {
+        //   document.getElementById("live-status").textContent =
+        //     "Connected to live feed";
+        // };
+        //
+        // socket.onmessage = (event) => {
+        //   // const newPost = JSON.parse(event.data);
+        //   // renderNewPost(newPost);
+        // };
+        //
+        // socket.onclose = () => {
+        //   document.getElementById("live-status").textContent =
+        //     "Disconnected from live feed";
+        // };
+      </script>
+      -->
+    </section>
     <section class="posts-section">
       
       <article class="post-card">
