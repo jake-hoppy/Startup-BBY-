@@ -21,11 +21,13 @@
   </header>
 
   <main>
+    <div class="feed-layout">
+      <div class="feed-main">
     <section class="create-post-section">
       <h2>Create Post</h2>
 
       <textarea
-        placeholder="Share a study win, question, or resource…"
+        placeholder="Share a study accomplishment, question, or resource…"
         rows="4">
       </textarea>
 
@@ -33,7 +35,7 @@
         <select>
           <option value="">Select category</option>
           <option value="question">Question</option>
-          <option value="accomplishment">Win</option>
+          <option value="accomplishment">Accomplishments</option>
           <option value="resource">Resource</option>
         </select>
 
@@ -125,6 +127,38 @@
       </article>
 
     </section>
+      </div>
+
+      <aside class="feed-sidebar">
+        <section class="sidebar-card">
+          <h3>Today’s Goal</h3>
+          <p>Finish 2 tasks</p>
+        </section>
+
+        <section class="sidebar-card">
+          <h3>Upcoming Due</h3>
+          <p>Lab 3 – Friday</p>
+        </section>
+
+        <section class="sidebar-card">
+          <h3>Study Buddies Online</h3>
+          <ul>
+            <li>Alex</li>
+            <li>Sarah</li>
+            <li>Mike</li>
+          </ul>
+        </section>
+
+        <section class="sidebar-card">
+          <h3>Suggested Resources</h3>
+          <ul>
+            <li><a href="#">Recursion practice problems</a></li>
+            <li><a href="#">Regex cheat sheet</a></li>
+            <li><a href="#">Git deploy checklist</a></li>
+          </ul>
+        </section>
+      </aside>
+    </div>
   </main>
   <footer class="site-footer"></footer>
     <p><strong>Sociallearning</strong></p>
