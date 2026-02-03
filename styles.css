@@ -1,3 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap');
+
+/* =========================
+   TITLE (imported)
+   ========================= */
+
+   .site-title,
+   header h1,
+   .page-title{
+     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+     font-weight: 800;
+     letter-spacing: -0.03em;
+   }
+   .site-title{
+    font-size: 1.35rem;
+    background: linear-gradient(135deg, #7c5cff, #34d399);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+   
+
 /* =========================
    1) BASE + THEME TOKENS
    ========================= */
