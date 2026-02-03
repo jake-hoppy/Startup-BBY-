@@ -464,3 +464,45 @@ ul{
     color: var(--muted);
   }
     
+  /* =========================
+   7) HOME DASHBOARD
+   ========================= */
+
+.welcome-section{
+    padding: 18px;
+  }
+  
+  .welcome-subtitle{
+    margin-top: 6px;
+    color: var(--muted);
+  }
+  
+  .focus-list, .activity-list{
+    margin-top: 10px;
+  }
+  
+  .view-feed-link{
+    display:inline-block;
+    margin-top: 10px;
+    color: rgba(255,255,255,.92);
+    text-decoration:none;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(124,92,255,.12);
+  }
+  
+  .view-feed-link:hover{
+    background: rgba(124,92,255,.18);
+    border-color: rgba(124,92,255,.35);
+  }
+  
+  .actions-buttons{
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .actions-buttons button{
+    flex: 1 1 180px;
+  }
+  
