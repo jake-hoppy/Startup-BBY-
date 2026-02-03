@@ -359,4 +359,108 @@ ul{
     border: 1px solid rgba(255,255,255,.12);
     background: rgba(0,0,0,.16);
   }
+/* =========================
+   6) TO DO PAGE + CALENDAR
+   ========================= */
+
+   .todo-layout{
+    display:grid;
+    grid-template-columns: 1.7fr 1fr;
+    gap: 16px;
+    align-items:start;
+  }
   
+  .todo-filters .filter-buttons{
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .calendar-section .calendar-card{
+    padding: 14px;
+  }
+  
+  .calendar-header{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .calendar-header h3{
+    margin:0;
+    font-size: 14px;
+    color: var(--text);
+  }
+  
+  .calendar-header button{
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    padding: 0;
+  }
+  
+  .calendar-grid{
+    display:grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+  }
+  
+  .calendar-day{
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(0,0,0,.14);
+    min-height: 44px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color: var(--muted);
+  }
+  
+  .calendar-day-label{
+    background: transparent;
+    border-color: transparent;
+    min-height: 28px;
+    font-size: 12px;
+    color: var(--faint);
+  }
+  
+  .calendar-day-empty{
+    opacity: .35;
+  }
+  
+  .calendar-day:not(.calendar-day-label):not(.calendar-day-empty):hover{
+    border-color: rgba(124,92,255,.45);
+    background: rgba(124,92,255,.10);
+    color: var(--text);
+  }
+  
+  .calendar-legend{
+    margin-top: 12px;
+    color: var(--faint);
+    font-size: 13px;
+  }
+  
+  .todo-sidebar{
+    position: sticky;
+    top: 14px;
+    display:grid;
+    gap: 12px;
+  }
+  
+  .upcoming-list{
+    list-style: none;
+    padding-left: 0;
+    margin: 10px 0 0;
+  }
+  
+  .upcoming-list li{
+    padding: 10px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(0,0,0,.14);
+    margin-bottom: 10px;
+    color: var(--muted);
+  }
+    
