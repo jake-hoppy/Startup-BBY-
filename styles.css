@@ -505,7 +505,72 @@ ul{
   .actions-buttons button{
     flex: 1 1 180px;
   }
-  
+
+/* Home dashboard layout (match feed/toDo grid vibe) */
+.home-layout{
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.home-main{
+  display: grid;
+  gap: 12px;
+}
+
+.home-sidebar{
+  position: sticky;
+  top: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+/* Compact “stats” row */
+.stats-grid{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.stat-card{
+  background: rgba(0,0,0,.14);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.stat-label{
+  font-size: 12px;
+  color: var(--faint);
+  margin: 0 0 6px;
+}
+
+.stat-value{
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--text);
+}
+
+.stat-sub{
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Make home cards tighter */
+.home-main section{
+  margin: 0;
+}
+
+@media (max-width: 900px){
+  .home-layout{ grid-template-columns: 1fr; }
+  .home-sidebar{ position: static; }
+  .stats-grid{ grid-template-columns: 1fr; }
+}
 
 /* =========================
    7.5) AUTH / LOGIN PAGE
@@ -676,4 +741,3 @@ main.auth-main{
       flex-wrap: wrap;
     }
   }
-  
