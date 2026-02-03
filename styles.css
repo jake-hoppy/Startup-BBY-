@@ -192,3 +192,59 @@ button{
     font-weight: 600;
   }
   
+  /* =========================
+   4) REUSABLE CARDS
+   ========================= */
+
+.sidebar-card,
+.post-card,
+.create-post-section,
+.websocket-placeholder,
+.todo-filters,
+.calendar-card,
+.welcome-section,
+.focus-section,
+.activity-section,
+.actions-section{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+
+/* headings inside cards */
+.sidebar-card h2,
+.sidebar-card h3,
+.create-post-section h2,
+.websocket-placeholder h2,
+.todo-filters h2,
+.calendar-section h2,
+.welcome-section h2,
+.focus-section h2,
+.activity-section h2,
+.actions-section h2{
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+/* lists */
+ul{
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.sidebar-card ul{
+  padding-left: 16px;
+}
+
+/* subtle tag vibe for meta text */
+.post-meta{
+  color: var(--faint);
+  font-size: 12px;
+}
+.post-meta span{
+  display: inline-block;
+  margin-right: 12px;
+}
