@@ -112,9 +112,6 @@ header{
     height: 22px;
     opacity: .85;
   }
-    /* =========================
-     3) MAIN NAV
-     ========================= */
   main > nav{
     width:100%;
     border: 1px solid var(--border);
@@ -122,5 +119,76 @@ header{
     border-radius: var(--radius);
     padding: 10px 12px;
     margin: 12px 0 18px;
+  }
+  
+  /* =========================
+   3) BUTTONS + INPUTS + FORMS
+   ========================= */
+
+button{
+    cursor:pointer;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    color: var(--text);
+    padding: 10px 12px;
+    font-weight: 600;
+    transition: transform .12s ease, background .12s ease, border-color .12s ease;
+  }
+  
+  button:hover{
+    background: rgba(255,255,255,.10);
+    border-color: rgba(255,255,255,.20);
+    transform: translateY(-1px);
+  }
+  
+  button:active{ transform: translateY(0px); }
+  
+  .create-post-section button,
+  form button[type="submit"],
+  .actions-buttons button{
+    background: linear-gradient(135deg, rgba(124,92,255,.95), rgba(124,92,255,.65));
+    border-color: rgba(124,92,255,.45);
+  }
+  
+  .create-post-section button:hover,
+  form button[type="submit"]:hover,
+  .actions-buttons button:hover{
+    filter: brightness(1.05);
+  }
+  
+  input, textarea, select{
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.22);
+    color: var(--text);
+    padding: 10px 12px;
+    outline: none;
+  }
+  
+  textarea{ resize: vertical; min-height: 110px; }
+  
+  input:focus, textarea:focus, select:focus{
+    border-color: rgba(124,92,255,.65);
+    box-shadow: 0 0 0 4px rgba(124,92,255,.18);
+  }
+  
+  form{
+    display:grid;
+    gap: 12px;
+  }
+  
+  label{
+    font-size: 13px;
+    color: var(--muted);
+    display:block;
+    margin-bottom: 6px;
+  }
+  
+  #error{
+    color: #ff8b8b;
+    margin-top: 8px;
+    font-weight: 600;
   }
   
