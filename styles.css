@@ -213,7 +213,6 @@ button{
   padding: 14px;
 }
 
-/* headings inside cards */
 .sidebar-card h2,
 .sidebar-card h3,
 .create-post-section h2,
@@ -228,7 +227,6 @@ button{
   margin-bottom: 10px;
 }
 
-/* lists */
 ul{
   margin: 10px 0 0;
   padding-left: 18px;
@@ -239,7 +237,6 @@ ul{
   padding-left: 16px;
 }
 
-/* subtle tag vibe for meta text */
 .post-meta{
   color: var(--faint);
   font-size: 12px;
@@ -248,3 +245,118 @@ ul{
   display: inline-block;
   margin-right: 12px;
 }
+
+/* =========================
+   5) FEED PAGE
+   ========================= */
+
+   .feed-layout{
+    display:grid;
+    grid-template-columns: 1.7fr 1fr;
+    gap: 16px;
+    align-items:start;
+  }
+  
+  .feed-filters{
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .feed-filters button{
+    padding: 8px 10px;
+    border-radius: 999px;
+  }
+  
+  .create-post-section .post-controls{
+    display:flex;
+    gap: 10px;
+    margin-top: 10px;
+    align-items:center;
+  }
+  .create-post-section select{
+    max-width: 220px;
+  }
+  
+  .posts-section{
+    display:grid;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  
+  .post-card{
+    display:grid;
+    grid-template-columns: 46px 1fr;
+    gap: 12px;
+    padding: 14px;
+  }
+  
+  .post-avatar{
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display:grid;
+    place-items:center;
+    font-weight: 800;
+    color: rgba(255,255,255,.95);
+    background: linear-gradient(135deg, rgba(124,92,255,.55), rgba(52,211,153,.35));
+    border: 1px solid rgba(255,255,255,.14);
+  }
+  
+  .post-header{
+    display:flex;
+    gap: 10px;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+  
+  .post-author{
+    font-weight: 800;
+    color: var(--text);
+  }
+  
+  .post-text{
+    color: var(--muted);
+    margin: 0 0 10px;
+  }
+  
+  .post-actions{
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .post-actions button{
+    padding: 8px 10px;
+    border-radius: 999px;
+  }
+  
+  /* resource preview */
+  .resource-card{
+    border-radius: 12px;
+    border: 1px dashed rgba(255,255,255,.20);
+    background: rgba(0,0,0,.18);
+    padding: 10px 12px;
+    margin: 8px 0 10px;
+    color: var(--muted);
+  }
+  
+  /* sidebar sticky “dashboard” feel */
+  .feed-sidebar{
+    position: sticky;
+    top: 14px;
+    display:grid;
+    gap: 12px;
+  }
+  .api-placeholder #study-tip{
+    color: var(--muted);
+    padding-top: 6px;
+  }
+  #live-status{
+    color: var(--muted);
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(0,0,0,.16);
+  }
+  
