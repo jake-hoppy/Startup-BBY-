@@ -5,9 +5,10 @@
   <title>Login</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="auth-page">
 
-  <main>
+  <main class="auth-main">
+    <section class="auth-card">
     <nav>
       <ul>
         <li><a href="home.html">Home</a></li>
@@ -24,10 +25,10 @@
         <h1 class="site-title">Sociallearning</h1>
       </div>
 
-      <p>Please sign in to continue</p>
+      <p class="auth-subtitle">Please sign in to continue</p>
     </header>
 
-    <section>
+    <section class="auth-form">
       <form onsubmit="login(); return false;">
         <div>
           <label for="username">Email</label>
@@ -42,15 +43,14 @@
         <button type="submit">Log In</button>
       </form>
 
-      <p id="error"></p>
+      <p id="error" class="auth-subtitle" aria-live="polite"></p>
     </section>
 
-    <footer>
-      <p>
-        Don’t have an account?
-        <a href="#">Create one</a>
-      </p>
-    </footer>
+    <div class="auth-meta">
+      <span>Don’t have an account?</span>
+      <a href="#">Create one</a>
+    </div>
+    </section>
   </main>
 
   <script>
