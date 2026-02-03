@@ -506,3 +506,40 @@ ul{
     flex: 1 1 180px;
   }
   
+  /* =========================
+   8) FOOTER + RESPONSIVE
+   ========================= */
+
+.site-footer{
+    width:min(var(--max), calc(100% - 32px));
+    margin: 0 auto 28px;
+    padding: 16px 0 10px;
+    border-top: 1px solid var(--border);
+    color: var(--faint);
+  }
+  
+  .site-footer a{
+    color: rgba(255,255,255,.85);
+    text-decoration:none;
+    border-bottom: 1px solid rgba(255,255,255,.18);
+  }
+  .site-footer a:hover{
+    border-bottom-color: rgba(124,92,255,.65);
+  }
+  
+  /* Responsive: stack columns */
+  @media (max-width: 900px){
+    .feed-layout,
+    .todo-layout{
+      grid-template-columns: 1fr;
+    }
+    .feed-sidebar,
+    .todo-sidebar{
+      position: static;
+    }
+    header > nav,
+    header nav{
+      flex-wrap: wrap;
+    }
+  }
+  

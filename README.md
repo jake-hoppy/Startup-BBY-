@@ -87,7 +87,7 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 - [x] **Visually appealing colors and layout. No overflowing elements.** - I completed this with nice dark color scheme (might change) with no overflowing elements
 - [x] **Use of a CSS framework** - have a styles sheet that uses the css framework for different areas of my website
-- [ ] **All visual elements styled using CSS** - I did not complete this part of the deliverable.
+- [x] **All visual elements styled using CSS** - There are visually appealing buttons, cards, top bar movement, etc. that are all used with CSS
 - [ ] **Responsive to window resizing using flexbox and/or grid display** - I did not complete this part of the deliverable.
 - [ ] **Use of a imported font** - I did not complete this part of the deliverable.
 - [ ] **Use of different types of selectors including element, class, ID, and pseudo selectors** - I did not complete this part of the deliverable.
