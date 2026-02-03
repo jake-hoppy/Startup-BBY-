@@ -88,9 +88,9 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 - [x] **Visually appealing colors and layout. No overflowing elements.** - I completed this with nice dark color scheme (might change) with no overflowing elements
 - [x] **Use of a CSS framework** - have a styles sheet that uses the css framework for different areas of my website
 - [x] **All visual elements styled using CSS** - There are visually appealing buttons, cards, top bar movement, etc. that are all used with CSS
-- [ ] **Responsive to window resizing using flexbox and/or grid display** - I did not complete this part of the deliverable.
-- [ ] **Use of a imported font** - I did not complete this part of the deliverable.
-- [ ] **Use of different types of selectors including element, class, ID, and pseudo selectors** - I did not complete this part of the deliverable.
+- [x] **Responsive to window resizing using flexbox and/or grid display** - I used flex on the css styles sheet and now it resizes and even stacks once the window gets too thin
+- [x] **Use of a imported font** - I imported a font from google for my title
+- [x] **Use of different types of selectors including element, class, ID, and pseudo selectors** - I used element selectors, class selectors, ID selectors, and pseudo-selectors (such as :hover, :focus, and ::before) throughout my CSS to style elements and handle interactions.
 
 ## 🚀 React part 1: Routing deliverable
 
