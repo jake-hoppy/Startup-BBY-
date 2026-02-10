@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-page">
+
+  <main class="auth-main">
+    <nav class="auth-nav">
+      <ul>
+        <li><a href="home.html">somelthing else</a></li>
+        <li><a href="feed.html">Feed</a></li>
+        <li><a href="toDo.html">ToDo</a></li>
+      </ul>
+    </nav>
+    <section class="auth-card">
+      <header>
+        <div class="header-brand">
+          <div class="logo-placeholder">
+            <!-- Logo placeholder -->
+            <img src="SociallearningLogo.png" alt="Sociallearning logo">
+          </div>
+          <h1 class="site-title">Sociallearning</h1>
+        </div>
+
+        <p class="auth-subtitle">Please sign in to continue</p>
+      </header>
+      <section class="auth-form">
+        <form onsubmit="login(); return false;">
+          <div>
+            <label for="username">Email</label>
+            <input id="username" type="email" required>
+          </div>
+
+          <div>
+            <label for="password">Password</label>
+            <input id="password" type="password" required>
+          </div>
+
+          <button type="submit">Log In</button>
+        </form>
+
+        <p id="error" class="auth-subtitle" aria-live="polite"></p>
+      </section>
+
+      <div class="auth-meta">
+        <span>Don’t have an account?</span>
+        <a href="#">Create one</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function login() {
+      const email = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailRegex.test(email)) {
+        document.getElementById("error").innerText =
+          "Please enter a valid email address";
+        return;
+      }
+
+      // VERY simple fake login
+      if (email === "student@example.com" && password === "password") {
+        localStorage.setItem("loggedIn", "true");
+        window.location.href = "home.html";
+      } else {
+        document.getElementById("error").innerText =
+          "Invalid username or password";
+      }
+    }
+  </script>
+    <footer class="site-footer">
+    <p><strong>Sociallearning</strong></p>
+    <p>CS 260 – Web Programming</p>
+    <p>Jake Hopkins</p>
+    <p><a href="https://github.com/jake-hoppy/Startup-BBY-/blob/main/README.md" target="_blank" rel="noopener noreferrer">GitHub</a></p>
+    </footer>
+</body>
+</html>
