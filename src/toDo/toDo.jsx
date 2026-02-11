@@ -1,9 +1,9 @@
 import React from 'react';
 
-export function Feed() {
+export function Todo() {
   return (
     <main className="container-fluid bg-secondary text-center">
-      <div>feed displayed here</div>
+      <div>to do page displayed here</div>
     </main>
   );
 }
