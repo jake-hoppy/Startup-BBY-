@@ -19,16 +19,18 @@ export function Feed() {
               <Link to="/home">Home</Link>
             </li>
             <li>
-              <Link to="/feed" aria-current="page">
-                Feed
-              </Link>
+              <Link to="/feed">Feed</Link>
             </li>
             <li>
-              <Link to="/todo">To Do</Link>
+              <Link to="/todo" aria-current="page">
+                To Do
+              </Link>
             </li>
           </ul>
 
-          <button onClick={() => navigate('/login')}>Logout</button>
+          <Link to="/login">
+            <button>Logout</button>
+          </Link>
         </nav>
       </header>
 
