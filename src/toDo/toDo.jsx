@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AddClassModal } from './AddClassModal'; // adjust path if needed
+import { AddAssignmentModal } from './AddAssignmentModal'; // adjust path if needed
 
 export function ToDo() {
   // --- Calendar state + helpers ---
@@ -26,9 +27,6 @@ export function ToDo() {
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth()); // 0-11
 
-  // ✅ Step 3: modal open/close state
-  const [isAddClassOpen, setIsAddClassOpen] = useState(false);
-
   function goPrevMonth() {
     setViewMonth((m) => {
       if (m === 0) {
@@ -49,8 +47,21 @@ export function ToDo() {
     });
   }
 
+  // ✅ Modals
+  const [isAddClassOpen, setIsAddClassOpen] = useState(false);
+  const [isAddAssignmentOpen, setIsAddAssignmentOpen] = useState(false);
+
+  // ✅ Classes list (used for dropdown + filter buttons)
+  const classes = useMemo(() => ['CS 260', 'CS 224', 'Algorithms'], []);
+
+  // ✅ Filter state (All or a specific class)
+  const [selectedClass, setSelectedClass] = useState('All');
+
+  // ✅ Assignments state
+  const [assignments, setAssignments] = useState([]);
+
+  // ✅ Build calendar cells with a dateKey (YYYY-MM-DD) for each day cell
   const calendarCells = useMemo(() => {
-    // First day-of-week (0=Sun..6=Sat) for the 1st of the month
     const firstDow = new Date(viewYear, viewMonth, 1).getDay();
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
     const daysInPrevMonth = new Date(viewYear, viewMonth, 0).getDate();
@@ -62,27 +73,69 @@ export function ToDo() {
       cells.push({ type: 'header', label: d, inMonth: true })
     );
 
-    // Leading days from previous month (soft)
+    // Leading days from previous month
     for (let i = firstDow; i > 0; i--) {
       const dayNum = daysInPrevMonth - i + 1;
-      cells.push({ type: 'day', label: String(dayNum), inMonth: false });
+      const dateObj = new Date(viewYear, viewMonth - 1, dayNum);
+      cells.push({
+        type: 'day',
+        label: String(dayNum),
+        inMonth: false,
+        dateKey: dateObj.toISOString().slice(0, 10),
+      });
     }
 
     // Current month days
     for (let d = 1; d <= daysInMonth; d++) {
-      cells.push({ type: 'day', label: String(d), inMonth: true });
+      const dateObj = new Date(viewYear, viewMonth, d);
+      cells.push({
+        type: 'day',
+        label: String(d),
+        inMonth: true,
+        dateKey: dateObj.toISOString().slice(0, 10),
+      });
     }
 
-    // Trailing days from next month (soft) to complete the last week
+    // Trailing days from next month
     let nextDay = 1;
     while ((cells.length - 7) % 7 !== 0) {
-      cells.push({ type: 'day', label: String(nextDay), inMonth: false });
+      const dateObj = new Date(viewYear, viewMonth + 1, nextDay);
+      cells.push({
+        type: 'day',
+        label: String(nextDay),
+        inMonth: false,
+        dateKey: dateObj.toISOString().slice(0, 10),
+      });
       nextDay++;
     }
 
     return cells;
   }, [viewYear, viewMonth]);
-  // --- End calendar state + helpers ---
+
+  // ✅ Map assignments by dueDate for fast calendar lookup
+  const assignmentsByDate = useMemo(() => {
+    const map = new Map();
+    for (const a of assignments) {
+      const key = a.dueDate; // "YYYY-MM-DD"
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(a);
+    }
+    return map;
+  }, [assignments]);
+
+  // ✅ Filtered assignments list (for Upcoming Assignments)
+  const filteredAssignments = useMemo(() => {
+    return assignments.filter(
+      (a) => selectedClass === 'All' || a.className === selectedClass
+    );
+  }, [assignments, selectedClass]);
+
+  // ✅ Sorted version for rendering
+  const filteredAssignmentsSorted = useMemo(() => {
+    return filteredAssignments
+      .slice()
+      .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+  }, [filteredAssignments]);
 
   return (
     <>
@@ -122,10 +175,24 @@ export function ToDo() {
             <section className="todo-filters">
               <h2>Class Filter</h2>
               <div className="filter-buttons">
-                <button>All</button>
-                <button>CS 260</button>
-                <button>CS 224</button>
-                <button>Algorithms</button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedClass('All')}
+                  aria-pressed={selectedClass === 'All'}
+                >
+                  All
+                </button>
+
+                {classes.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setSelectedClass(c)}
+                    aria-pressed={selectedClass === c}
+                  >
+                    {c}
+                  </button>
+                ))}
               </div>
             </section>
 
@@ -146,19 +213,53 @@ export function ToDo() {
                 </div>
 
                 <div className="calendar-grid">
-                  {calendarCells.map((cell, i) => (
-                    <div
-                      key={i}
-                      className={`calendar-day ${
-                        cell.type === 'header' ? 'calendar-day-header' : ''
-                      } ${
-                        cell.type === 'day' && !cell.inMonth ? 'calendar-day-outside' : ''
-                      }`}
-                      style={cell.type === 'day' && !cell.inMonth ? { opacity: 0.45 } : undefined}
-                    >
-                      {cell.label}
-                    </div>
-                  ))}
+                  {calendarCells.map((cell, i) => {
+                    const dayAssignments =
+                      cell.type === 'day' && cell.dateKey
+                        ? assignmentsByDate.get(cell.dateKey) || []
+                        : [];
+
+                    const visibleDayAssignments = dayAssignments.filter(
+                      (a) => selectedClass === 'All' || a.className === selectedClass
+                    );
+
+                    return (
+                      <div
+                        key={i}
+                        className={`calendar-day ${
+                          cell.type === 'header' ? 'calendar-day-header' : ''
+                        } ${
+                          cell.type === 'day' && !cell.inMonth ? 'calendar-day-outside' : ''
+                        }`}
+                        style={
+                          cell.type === 'day' && !cell.inMonth ? { opacity: 0.45 } : undefined
+                        }
+                      >
+                        {cell.label}
+
+                        {/* ✅ Assignment markers */}
+                        {cell.type === 'day' && visibleDayAssignments.length > 0 && (
+                          <div className="calendar-badges">
+                            {visibleDayAssignments.slice(0, 2).map((a) => (
+                              <span
+                                key={a.id}
+                                className="calendar-badge"
+                                title={`${a.className}: ${a.name}`}
+                              >
+                                📝
+                              </span>
+                            ))}
+
+                            {visibleDayAssignments.length > 2 && (
+                              <span className="calendar-badge-more">
+                                +{visibleDayAssignments.length - 2}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div className="calendar-legend">
@@ -175,7 +276,6 @@ export function ToDo() {
               <h2>Add Class</h2>
               <p>Add a class from your Learning Suite link</p>
 
-              {/* ✅ Step 3: button opens the modal */}
               <button
                 className="add-class-button"
                 type="button"
@@ -186,31 +286,62 @@ export function ToDo() {
             </section>
 
             <section className="sidebar-card">
-              <h2>Upcoming Assignments</h2>
-              <ul className="upcoming-list">
-                <li><strong>CS 260:</strong> Project Checkpoint – Friday</li>
-                <li><strong>CS 224:</strong> Lab 3 – Friday</li>
-                <li><strong>Algorithms:</strong> Problem Set 2 – Monday</li>
-              </ul>
+              <h2>Assignments</h2>
+              <p>Add an assignment to your to-do list</p>
+
+              <button
+                className="add-assignment-button"
+                type="button"
+                onClick={() => setIsAddAssignmentOpen(true)}
+              >
+                Add Assignment
+              </button>
             </section>
 
             <section className="sidebar-card">
-              <h2>Upcoming Tests</h2>
+              <h2>Upcoming Assignments</h2>
+
               <ul className="upcoming-list">
-                <li><strong>CS 224:</strong> Quiz 1 – Thursday</li>
-                <li><strong>Algorithms:</strong> Midterm Review – Next week</li>
+                {filteredAssignmentsSorted.map((a) => (
+                  <li key={a.id}>
+                    <strong>{a.className}:</strong> {a.name} – {a.dueDate}
+                  </li>
+                ))}
+
+                {filteredAssignmentsSorted.length === 0 && (
+                  <li style={{ opacity: 0.7 }}>
+                    No assignments{selectedClass === 'All' ? '' : ` for ${selectedClass}`} yet.
+                  </li>
+                )}
               </ul>
             </section>
           </aside>
         </div>
       </main>
 
-      {/* ✅ Step 3: modal rendered inside component */}
+      {/* Add Class Modal */}
       <AddClassModal
         isOpen={isAddClassOpen}
         onClose={() => setIsAddClassOpen(false)}
         onSubmit={({ url, label }) => {
           console.log('Import iCal:', { url, label });
+        }}
+      />
+
+      {/* Add Assignment Modal */}
+      <AddAssignmentModal
+        isOpen={isAddAssignmentOpen}
+        onClose={() => setIsAddAssignmentOpen(false)}
+        classes={classes}
+        onSubmit={({ name, dueDate, className }) => {
+          const newAssignment = {
+            id: crypto.randomUUID?.() ?? String(Date.now()),
+            name,
+            dueDate, 
+            className,
+          };
+
+          setAssignments((prev) => [...prev, newAssignment]);
         }}
       />
     </>
