@@ -1,7 +1,85 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export function ToDo() {
+  // --- Calendar state + helpers ---
+  const MONTH_NAMES = useMemo(
+    () => [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ],
+    []
+  );
+
+  const today = useMemo(() => new Date(), []);
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth()); // 0-11
+
+  function goPrevMonth() {
+    setViewMonth((m) => {
+      if (m === 0) {
+        setViewYear((y) => y - 1);
+        return 11;
+      }
+      return m - 1;
+    });
+  }
+
+  function goNextMonth() {
+    setViewMonth((m) => {
+      if (m === 11) {
+        setViewYear((y) => y + 1);
+        return 0;
+      }
+      return m + 1;
+    });
+  }
+
+  const calendarCells = useMemo(() => {
+    // First day-of-week (0=Sun..6=Sat) for the 1st of the month
+    const firstDow = new Date(viewYear, viewMonth, 1).getDay();
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const daysInPrevMonth = new Date(viewYear, viewMonth, 0).getDate();
+
+    const cells = [];
+
+    // Weekday header row
+    ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach((d) =>
+      cells.push({ type: 'header', label: d, inMonth: true })
+    );
+
+    // Leading days from previous month (soft)
+    for (let i = firstDow; i > 0; i--) {
+      const dayNum = daysInPrevMonth - i + 1;
+      cells.push({ type: 'day', label: String(dayNum), inMonth: false });
+    }
+
+    // Current month days
+    for (let d = 1; d <= daysInMonth; d++) {
+      cells.push({ type: 'day', label: String(d), inMonth: true });
+    }
+
+    // Trailing days from next month (soft) to complete the last week
+    let nextDay = 1;
+    while ((cells.length - 7) % 7 !== 0) {
+      cells.push({ type: 'day', label: String(nextDay), inMonth: false });
+      nextDay++;
+    }
+
+    return cells;
+  }, [viewYear, viewMonth]);
+  // --- End calendar state + helpers ---
+
   return (
     <>
       <header>
@@ -52,28 +130,35 @@ export function ToDo() {
 
               <div className="calendar-card">
                 <div className="calendar-header">
-                  <button aria-label="Previous month">‹</button>
-                  <h3>January 2026</h3>
-                  <button aria-label="Next month">›</button>
+                  <button onClick={goPrevMonth} aria-label="Previous month" type="button">
+                    ‹
+                  </button>
+                  <h3>
+                    {MONTH_NAMES[viewMonth]} {viewYear}
+                  </h3>
+                  <button onClick={goNextMonth} aria-label="Next month" type="button">
+                    ›
+                  </button>
                 </div>
 
                 <div className="calendar-grid">
-                  {[
-                    'Sun','Mon','Tue','Wed','Thu','Fri','Sat',
-                    '', '', '', '', '', '1', '2',
-                    '3','4','5','6','7','8','9',
-                    '10','11','12','13','14','15','16',
-                    '17','18','19','20','21','22','23',
-                    '24','25','26','27','28','29','30',
-                    '31','','','','','',''
-                  ].map((day, i) => (
+                  {calendarCells.map((cell, i) => (
                     <div
                       key={i}
                       className={`calendar-day ${
-                        day === '' ? 'calendar-day-empty' : ''
+                        cell.type === 'header' ? 'calendar-day-header' : ''
+                      } ${
+                        cell.type === 'day' && !cell.inMonth
+                          ? 'calendar-day-outside'
+                          : ''
                       }`}
+                      style={
+                        cell.type === 'day' && !cell.inMonth
+                          ? { opacity: 0.45 }
+                          : undefined
+                      }
                     >
-                      {day}
+                      {cell.label}
                     </div>
                   ))}
                 </div>
