@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { AddClassModal } from './AddClassModal'; // adjust path if needed
 
 export function ToDo() {
   // --- Calendar state + helpers ---
@@ -24,6 +25,9 @@ export function ToDo() {
   const today = useMemo(() => new Date(), []);
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth()); // 0-11
+
+  // ✅ Step 3: modal open/close state
+  const [isAddClassOpen, setIsAddClassOpen] = useState(false);
 
   function goPrevMonth() {
     setViewMonth((m) => {
@@ -148,15 +152,9 @@ export function ToDo() {
                       className={`calendar-day ${
                         cell.type === 'header' ? 'calendar-day-header' : ''
                       } ${
-                        cell.type === 'day' && !cell.inMonth
-                          ? 'calendar-day-outside'
-                          : ''
+                        cell.type === 'day' && !cell.inMonth ? 'calendar-day-outside' : ''
                       }`}
-                      style={
-                        cell.type === 'day' && !cell.inMonth
-                          ? { opacity: 0.45 }
-                          : undefined
-                      }
+                      style={cell.type === 'day' && !cell.inMonth ? { opacity: 0.45 } : undefined}
                     >
                       {cell.label}
                     </div>
@@ -173,9 +171,18 @@ export function ToDo() {
           </section>
 
           <aside className="todo-sidebar">
-            <section className="sidebar-card db-placeholder">
-              <h2>Assignments loaded from database</h2>
-              <div id="db-assignments">Loading assignments…</div>
+            <section className="sidebar-card">
+              <h2>Add Class</h2>
+              <p>Add a class from your Learning Suite link</p>
+
+              {/* ✅ Step 3: button opens the modal */}
+              <button
+                className="add-class-button"
+                type="button"
+                onClick={() => setIsAddClassOpen(true)}
+              >
+                Add Class
+              </button>
             </section>
 
             <section className="sidebar-card">
@@ -197,6 +204,15 @@ export function ToDo() {
           </aside>
         </div>
       </main>
+
+      {/* ✅ Step 3: modal rendered inside component */}
+      <AddClassModal
+        isOpen={isAddClassOpen}
+        onClose={() => setIsAddClassOpen(false)}
+        onSubmit={({ url, label }) => {
+          console.log('Import iCal:', { url, label });
+        }}
+      />
     </>
   );
 }
