@@ -287,6 +287,19 @@ export function ToDo() {
             </section>
 
             <section className="sidebar-card">
+              <h2>Make Class</h2>
+              <p>Create a new class</p>
+
+              <button
+                className="make-class-button"
+                type="button"
+                onClick={() => setIsAddClassOpen(true)}
+              >
+                Make Class
+              </button>
+            </section>
+
+            <section className="sidebar-card">
               <h2>Assignments</h2>
               <p>Add an assignment to your to-do list</p>
 
