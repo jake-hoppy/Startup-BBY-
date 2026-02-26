@@ -92,8 +92,28 @@
   flex-wrap: wrap;
 }
 
-.actions-buttons button {
+.actions-buttons button,
+.actions-btn-link {
   flex: 1 1 180px;
+}
+
+/* Link styled as primary button (Quick Actions) */
+.actions-btn-link {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  color: var(--text);
+  cursor: pointer;
+  border-radius: 12px;
+  border: 1px solid rgba(6,182,212,.45);
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  padding: 10px 12px;
+  font-weight: 600;
+  transition: transform .12s ease, filter .12s ease;
+}
+.actions-btn-link:hover {
+  filter: brightness(1.05);
+  color: var(--text);
 }
 
 @media (max-width: 900px) {

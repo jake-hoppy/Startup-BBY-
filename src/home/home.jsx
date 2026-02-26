@@ -28,8 +28,8 @@ export function Home() {
             </li>
           </ul>
 
-          <Link to="/login">
-            <button>Logout</button>
+          <Link to="/login" className="nav-logout-link">
+            <button type="button">Logout</button>
           </Link>
         </nav>
       </header>
@@ -80,15 +80,15 @@ export function Home() {
                 <li>Sarah finished CS 224 Lab 3</li>
                 <li>3 classmates are studying Algorithms</li>
               </ul>
-              <a href="feed.html" className="view-feed-link">View full feed →</a>
+              <Link to="/feed" className="view-feed-link">View full feed →</Link>
             </section>
 
             <section className="actions-section">
               <h2>Quick Actions</h2>
               <div className="actions-buttons">
-                <button onClick={() => (window.location.href = 'toDo.html')}>Add Assignment</button>
-                <button onClick={() => (window.location.href = 'feed.html')}>Create Post</button>
-                <button onClick={() => (window.location.href = 'toDo.html')}>View To-Do List</button>
+                <Link to="/todo" className="actions-btn-link">Add Assignment</Link>
+                <Link to="/feed" className="actions-btn-link">Create Post</Link>
+                <Link to="/todo" className="actions-btn-link">View To-Do List</Link>
               </div>
             </section>
           </div>
@@ -117,8 +117,8 @@ export function Home() {
             <section className="sidebar-card">
               <h2>Quick Links</h2>
               <ul>
-                <li><a href="toDo.html">Homework Hub</a></li>
-                <li><a href="feed.html">Class Feed</a></li>
+                <li><Link to="/todo">Homework Hub</Link></li>
+                <li><Link to="/feed">Class Feed</Link></li>
               </ul>
             </section>
           </aside>

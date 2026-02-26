@@ -162,8 +162,8 @@ export function ToDo() {
             </li>
           </ul>
 
-          <Link to="/login">
-            <button>Logout</button>
+          <Link to="/login" className="nav-logout-link">
+            <button type="button">Logout</button>
           </Link>
         </nav>
       </header>
