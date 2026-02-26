@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { CreateAccountModal } from './CreateAccountModal';
 import './login.css';
 
 export function Login() {
   const navigate = useNavigate();
+  const [showCreateAccount, setShowCreateAccount] = useState(false);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -91,10 +93,18 @@ export function Login() {
 
           <div className="auth-meta">
             <span>Don’t have an account?</span>
-            <Link to="#">Create one</Link>
+            <button type="button" className="auth-meta-link" onClick={() => setShowCreateAccount(true)}>
+              Create one
+            </button>
           </div>
         </section>
       </main>
+
+      <CreateAccountModal
+        isOpen={showCreateAccount}
+        onClose={() => setShowCreateAccount(false)}
+        onSubmit={() => setShowCreateAccount(false)}
+      />
     </div>
   );
 }
