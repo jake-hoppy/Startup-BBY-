@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AddClassModal } from './AddClassModal'; // adjust path if needed
-import { AddAssignmentModal } from './AddAssignmentModal'; // adjust path if needed
+import { AddClassModal } from './AddClassModal';
+import { AddAssignmentModal } from './AddAssignmentModal';
+import './toDo.css';
 
 export function ToDo() {
   // --- Calendar state + helpers ---

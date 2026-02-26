@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import './feed.css';
 
 export function Feed() {
   const navigate = useNavigate();
