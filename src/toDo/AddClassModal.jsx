@@ -1,29 +1,69 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 /**
- * AddClassModal — single field: class name.
- * Props: isOpen, onClose, onSubmit({ className })
+ * AddClassModal
+ * - Controlled by: isOpen (boolean)
+ * - Close via: onClose()
+ * - Submit via: onSubmit({ url, label })
+ *
+ * No backend logic here—just UI + basic validation.
  */
 export function AddClassModal({ isOpen, onClose, onSubmit }) {
-  const [className, setClassName] = useState("");
+  const [url, setUrl] = useState("");
+  const [label, setLabel] = useState("");
 
+  // Reset fields whenever the modal opens
   useEffect(() => {
     if (isOpen) {
-      setClassName("");
+      setUrl("");
+      setLabel("");
     }
   }, [isOpen]);
 
+  // Escape key to close
   useEffect(() => {
     if (!isOpen) return;
+
     const onKeyDown = (e) => {
       if (e.key === "Escape") onClose?.();
     };
+
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isOpen, onClose]);
 
-  const trimmed = className.trim();
-  const isValid = trimmed.length > 0;
+  const trimmedUrl = url.trim();
+
+  const urlHint = useMemo(() => {
+    if (!trimmedUrl) return null;
+    const lower = trimmedUrl.toLowerCase();
+    if (lower.startsWith("webcal://")) {
+      return "Tip: webcal:// links usually work if converted to https://";
+    }
+    if (lower.includes(".ics")) {
+      return "Looks like an .ics link ✅";
+    }
+    if (lower.startsWith("http://") || lower.startsWith("https://")) {
+      return "This is a URL, but it doesn’t look like an .ics link.";
+    }
+    return "That doesn’t look like a valid URL yet.";
+  }, [trimmedUrl]);
+
+  const isValid = useMemo(() => {
+    if (!trimmedUrl) return false;
+
+    const lower = trimmedUrl.toLowerCase();
+    const looksLikeWebcal = lower.startsWith("webcal://");
+    const looksLikeHttp = lower.startsWith("http://") || lower.startsWith("https://");
+
+    // Minimal heuristic: allow webcal OR http(s) with .ics somewhere
+    if (looksLikeWebcal) return true;
+    if (looksLikeHttp && lower.includes(".ics")) return true;
+
+    return false;
+  }, [trimmedUrl]);
+
+  if (!isOpen) return null;
 
   function handleOverlayClick() {
     onClose?.();
@@ -36,11 +76,19 @@ export function AddClassModal({ isOpen, onClose, onSubmit }) {
   function handleSubmit(e) {
     e.preventDefault();
     if (!isValid) return;
-    onSubmit?.({ className: trimmed });
+
+    const cleaned =
+      trimmedUrl.toLowerCase().startsWith("webcal://")
+        ? "https://" + trimmedUrl.slice("webcal://".length)
+        : trimmedUrl;
+
+    onSubmit?.({
+      url: cleaned,
+      label: label.trim() || null,
+    });
+
     onClose?.();
   }
-
-  if (!isOpen) return null;
 
   return (
     <div
@@ -68,19 +116,34 @@ export function AddClassModal({ isOpen, onClose, onSubmit }) {
         </div>
 
         <p className="sl-modal-subtitle">
-          Enter the name of the class you want to add.
+          Paste an iCalendar (.ics) link from Learning Suite / Canvas / Google Calendar.
         </p>
 
         <form onSubmit={handleSubmit} className="sl-modal-form">
           <label className="sl-modal-label">
-            Class name
+            iCal / ICS link
             <input
               className="sl-modal-input"
               type="text"
-              value={className}
-              onChange={(e) => setClassName(e.target.value)}
-              placeholder="e.g. CS 260"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://.../calendar.ics  or  webcal://..."
               autoFocus
+            />
+          </label>
+
+          <div className="sl-modal-hint" aria-live="polite">
+            {urlHint}
+          </div>
+
+          <label className="sl-modal-label">
+            Class label (optional)
+            <input
+              className="sl-modal-input"
+              type="text"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder="CS 260"
             />
           </label>
 
@@ -89,10 +152,16 @@ export function AddClassModal({ isOpen, onClose, onSubmit }) {
               Cancel
             </button>
             <button type="submit" className="sl-btn sl-btn-primary" disabled={!isValid}>
-              Add Class
+              Import
             </button>
           </div>
         </form>
+
+        <div className="sl-modal-footer">
+          <small>
+            If the link is private, you may need a public/share iCal link or an exported .ics file.
+          </small>
+        </div>
       </div>
     </div>
   );

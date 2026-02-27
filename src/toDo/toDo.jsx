@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AddClassModal } from './AddClassModal';
+import { MakeClassModal } from './MakeClassModal';
 import { AddAssignmentModal } from './AddAssignmentModal';
 import './toDo.css';
 
@@ -50,10 +51,11 @@ export function ToDo() {
 
   // Modals
   const [isAddClassOpen, setIsAddClassOpen] = useState(false);
+  const [isMakeClassOpen, setIsMakeClassOpen] = useState(false);
   const [isAddAssignmentOpen, setIsAddAssignmentOpen] = useState(false);
 
   // Classes list (used for dropdown + filter buttons); can add via Add Class modal
-  const [classes, setClasses] = useState(['CS 260', 'CS 224', 'Algorithms']);
+  const [classes, setClasses] = useState([]);
 
   // Filter state (All or a specific class)
   const [selectedClass, setSelectedClass] = useState('All');
@@ -113,7 +115,7 @@ export function ToDo() {
     return cells;
   }, [viewYear, viewMonth]);
 
-  // ✅ Map assignments by dueDate for fast calendar lookup
+  // Map assignments by dueDate for fast calendar lookup
   const assignmentsByDate = useMemo(() => {
     const map = new Map();
     for (const a of assignments) {
@@ -124,14 +126,14 @@ export function ToDo() {
     return map;
   }, [assignments]);
 
-  // ✅ Filtered assignments list (for Upcoming Assignments)
+  // Filtered assignments list (for Upcoming Assignments)
   const filteredAssignments = useMemo(() => {
     return assignments.filter(
       (a) => selectedClass === 'All' || a.className === selectedClass
     );
   }, [assignments, selectedClass]);
 
-  // ✅ Sorted version for rendering
+  // Sorted version for rendering
   const filteredAssignmentsSorted = useMemo(() => {
     return filteredAssignments
       .slice()
@@ -238,7 +240,7 @@ export function ToDo() {
                       >
                         {cell.label}
 
-                        {/* ✅ Assignment markers */}
+                        {/* Assignment markers */}
                         {cell.type === 'day' && visibleDayAssignments.length > 0 && (
                           <div className="calendar-badges">
                             {visibleDayAssignments.slice(0, 2).map((a) => (
@@ -288,12 +290,12 @@ export function ToDo() {
 
             <section className="sidebar-card">
               <h2>Make Class</h2>
-              <p>Create a new class</p>
+              <p>Create a new class (not from Learning Suite)</p>
 
               <button
                 className="make-class-button"
                 type="button"
-                onClick={() => setIsAddClassOpen(true)}
+                onClick={() => setIsMakeClassOpen(true)}
               >
                 Make Class
               </button>
@@ -333,10 +335,23 @@ export function ToDo() {
         </div>
       </main>
 
-      {/* Add Class Modal */}
+      {/* Add Class Modal (Learning Suite / iCal) */}
       <AddClassModal
         isOpen={isAddClassOpen}
         onClose={() => setIsAddClassOpen(false)}
+        onSubmit={({ url, label }) => {
+          if (label?.trim()) {
+            setClasses((prev) =>
+              prev.includes(label.trim()) ? prev : [...prev, label.trim()]
+            );
+          }
+        }}
+      />
+
+      {/* Make Class Modal (single class by name) */}
+      <MakeClassModal
+        isOpen={isMakeClassOpen}
+        onClose={() => setIsMakeClassOpen(false)}
         onSubmit={({ className: newClassName }) => {
           setClasses((prev) =>
             prev.includes(newClassName) ? prev : [...prev, newClassName]
