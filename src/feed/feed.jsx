@@ -232,13 +232,10 @@ export function Feed() {
               <h3>Suggested Resources</h3>
               <ul>
                 <li>
-                  <a href="#">Recursion practice problems</a>
+                  <a href="https://coderpad.io/regular-expression-cheat-sheet/">Regex cheat sheet</a>
                 </li>
                 <li>
-                  <a href="#">Regex cheat sheet</a>
-                </li>
-                <li>
-                  <a href="#">Git deploy checklist</a>
+                  <a href="https://masteryls.com/course/1a8c01d0-5e9c-4a7c-8597-55bd5159967e/topic/6d489420-b320-4bc9-b43d-5c041a08b6bf">Git deploy checklist</a>
                 </li>
               </ul>
             </section>
