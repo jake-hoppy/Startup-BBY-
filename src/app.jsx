@@ -4,7 +4,6 @@ import './app.css';
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-
 import { Home } from './home/home';
 import { Login } from './login/login';
 import { Feed } from './feed/feed';
@@ -16,9 +15,9 @@ export default function App() {
       <div className="body bg-dark text-light d-flex flex-column min-vh-100">
         <main className="flex-fill">
           <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/home" element={<Home />} />
+            <Route path="/" element={<Navigate to="/home" replace />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/feed" element={<Feed />} />
             <Route path="/todo" element={<ToDo />} />
             <Route path="*" element={<NotFound />} />

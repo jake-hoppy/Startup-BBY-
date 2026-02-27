@@ -1,9 +1,14 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './home.css';
 
-
 export function Home() {
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    navigate('/login');
+  }
+
   return (
     <>
       <header>
@@ -28,9 +33,9 @@ export function Home() {
             </li>
           </ul>
 
-          <Link to="/login" className="nav-logout-link">
-            <button type="button">Logout</button>
-          </Link>
+          <button type="button" className="nav-logout-link" onClick={handleLogout}>
+            Logout
+          </button>
         </nav>
       </header>
 

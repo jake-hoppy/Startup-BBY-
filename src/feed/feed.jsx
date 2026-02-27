@@ -5,6 +5,10 @@ import './feed.css';
 export function Feed() {
   const navigate = useNavigate();
 
+  function handleLogout() {
+    navigate('/login');
+  }
+
   return (
     <>
       <header>
@@ -29,9 +33,9 @@ export function Feed() {
             </li>
           </ul>
 
-          <Link to="/login" className="nav-logout-link">
-            <button type="button">Logout</button>
-          </Link>
+          <button type="button" className="nav-logout-link" onClick={handleLogout}>
+            Logout
+          </button>
         </nav>
       </header>
 
@@ -222,9 +226,7 @@ export function Feed() {
             <section className="sidebar-card">
               <h3>Study Buddies Online</h3>
               <ul>
-                <li>Alex</li>
-                <li>Sarah</li>
-                <li>Mike</li>
+                no one online
               </ul>
             </section>
 
