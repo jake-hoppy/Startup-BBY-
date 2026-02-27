@@ -1,15 +1,60 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { setCurrentUser } from '../auth';
+import { setCurrentUser, getCurrentUser, getAssignments } from '../auth';
 import './home.css';
+
+function formatShortDay(ymd) {
+  const d = new Date(ymd + 'T12:00:00');
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  return days[d.getDay()];
+}
+
+function getEndOfWeekStr(todayStr) {
+  const d = new Date(todayStr + 'T12:00:00');
+  const day = d.getDay();
+  const daysToSunday = day === 0 ? 0 : 7 - day;
+  d.setDate(d.getDate() + daysToSunday);
+  return d.toISOString().slice(0, 10);
+}
 
 export function Home() {
   const navigate = useNavigate();
+  const currentUser = getCurrentUser();
+  const assignments = useMemo(
+    () => (currentUser ? getAssignments(currentUser) : []),
+    [currentUser]
+  );
+
+  const { overdue, dueSoonCount, nextDue, dueThisWeekCount } = useMemo(() => {
+    const today = new Date();
+    const todayStr = today.toISOString().slice(0, 10);
+    const endOfWeekStr = getEndOfWeekStr(todayStr);
+
+    const overdueList = assignments
+      .filter((a) => a.dueDate < todayStr)
+      .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+    const upcoming = assignments
+      .filter((a) => a.dueDate >= todayStr)
+      .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+    const nextDueAssignment = upcoming[0] ?? null;
+    const dueThisWeek = assignments.filter(
+      (a) => a.dueDate >= todayStr && a.dueDate <= endOfWeekStr
+    );
+
+    return {
+      overdue: overdueList,
+      dueSoonCount: upcoming.length,
+      nextDue: nextDueAssignment,
+      dueThisWeekCount: dueThisWeek.length,
+    };
+  }, [assignments]);
 
   function handleLogout() {
     setCurrentUser(null);
     navigate('/login');
   }
+
+  const displayName = currentUser ? currentUser.split('@')[0] : 'there';
 
   return (
     <>
@@ -45,7 +90,7 @@ export function Home() {
         <div className="home-layout">
           <div className="home-main">
             <section className="welcome-section">
-              <h2>Welcome back, Jake</h2>
+              <h2>Welcome back, {displayName}</h2>
               <p className="welcome-subtitle">
                 Learn together. Stay organized. Share progress.
               </p>
@@ -53,20 +98,26 @@ export function Home() {
               <div className="stats-grid">
                 <div className="stat-card">
                   <p className="stat-label">Due soon</p>
-                  <p className="stat-value">3</p>
-                  <p className="stat-sub">Next: CS 260 Project (Fri)</p>
+                  <p className="stat-value">{dueSoonCount}</p>
+                  <p className="stat-sub">
+                    {nextDue
+                      ? `Next: ${nextDue.className} ${nextDue.name} (${formatShortDay(nextDue.dueDate)})`
+                      : 'No upcoming assignments'}
+                  </p>
                 </div>
 
                 <div className="stat-card">
                   <p className="stat-label">Overdue</p>
-                  <p className="stat-value">2</p>
-                  <p className="stat-sub">Knock these out today</p>
+                  <p className="stat-value">{overdue.length}</p>
+                  <p className="stat-sub">
+                    {overdue.length > 0 ? 'Knock these out today' : 'All caught up'}
+                  </p>
                 </div>
 
                 <div className="stat-card">
                   <p className="stat-label">Friends online</p>
-                  <p className="stat-value">3</p>
-                  <p className="stat-sub">1 new post</p>
+                  <p className="stat-value">—</p>
+                  <p className="stat-sub">Coming soon</p>
                 </div>
               </div>
             </section>
@@ -74,9 +125,17 @@ export function Home() {
             <section className="focus-section">
               <h2>Today’s Focus</h2>
               <ul className="focus-list">
-                <li>You have 3 assignments due this week</li>
-                <li>Next due: CS 260 Project – Friday</li>
-                <li>2 tasks overdue</li>
+                <li>
+                  You have {dueThisWeekCount} assignment{dueThisWeekCount !== 1 ? 's' : ''} due this week
+                </li>
+                <li>
+                  {nextDue
+                    ? `Next due: ${nextDue.className} ${nextDue.name} – ${formatShortDay(nextDue.dueDate)}`
+                    : 'No upcoming assignments'}
+                </li>
+                <li>
+                  {overdue.length} task{overdue.length !== 1 ? 's' : ''} overdue
+                </li>
               </ul>
             </section>
 
@@ -103,14 +162,23 @@ export function Home() {
           <aside className="home-sidebar">
             <section className="sidebar-card">
               <h2>Upcoming</h2>
-              <ul>
-                <li><strong>CS 260</strong> — Project checkpoint (Fri)</li>
-                <li><strong>Canvas</strong> — Quiz due (Sun)</li>
-                <li><strong>Learning Suite</strong> — Reading (Mon)</li>
-              </ul>
-              <p style={{ marginTop: '10px', color: 'var(--faint)', fontSize: '13px' }}>
-                (placeholder: populated from Canvas / Learning Suite)
-              </p>
+              {assignments.length === 0 ? (
+                <p style={{ color: 'var(--muted)', margin: 0 }}>
+                  No assignments. Add some in <Link to="/todo">To Do</Link>.
+                </p>
+              ) : (
+                <ul>
+                  {assignments
+                    .slice()
+                    .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
+                    .slice(0, 5)
+                    .map((a) => (
+                      <li key={a.id}>
+                        <strong>{a.className}</strong> — {a.name} ({formatShortDay(a.dueDate)})
+                      </li>
+                    ))}
+                </ul>
+              )}
             </section>
 
             <section className="sidebar-card">
