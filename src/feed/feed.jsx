@@ -1,13 +1,20 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { setCurrentUser, getCurrentUser, getAssignments } from '../auth';
+import { setCurrentUser, getCurrentUser, getAssignments, getPosts, savePosts } from '../auth';
 import './feed.css';
 
 export function Feed() {
   const navigate = useNavigate();
   const currentUser = getCurrentUser();
 
-  // Same assignments as To Do — load from localStorage per user, sorted by due date
+  const [postText, setPostText] = useState('');
+  const [postCategory, setPostCategory] = useState('');
+  const [posts, setPosts] = useState(() => (currentUser ? getPosts(currentUser) : []));
+
+  useEffect(() => {
+    if (currentUser) setPosts(getPosts(currentUser));
+  }, [currentUser]);
+
   const upcomingDue = useMemo(() => {
     if (!currentUser) return [];
     const list = getAssignments(currentUser);
@@ -20,6 +27,40 @@ export function Feed() {
   function handleLogout() {
     setCurrentUser(null);
     navigate('/login');
+  }
+
+  function handleCreatePost(e) {
+    e.preventDefault();
+    const trimmed = postText.trim();
+    if (!trimmed || !currentUser) return;
+    const newPost = {
+      id: crypto.randomUUID?.() ?? String(Date.now()),
+      author: currentUser,
+      text: trimmed,
+      category: postCategory || 'post',
+      createdAt: new Date().toISOString(),
+    };
+    const next = [newPost, ...posts];
+    setPosts(next);
+    savePosts(currentUser, next);
+    setPostText('');
+    setPostCategory('');
+  }
+
+  function authorDisplay(email) {
+    if (!email) return '?';
+    const part = email.split('@')[0];
+    return part.length > 2 ? part.slice(0, 2).toUpperCase() : part.toUpperCase();
+  }
+
+  function timeAgo(iso) {
+    const d = new Date(iso);
+    const sec = (Date.now() - d.getTime()) / 1000;
+    if (sec < 60) return 'just now';
+    if (sec < 3600) return `${Math.floor(sec / 60)}m ago`;
+    if (sec < 86400) return `${Math.floor(sec / 3600)}h ago`;
+    if (sec < 604800) return `${Math.floor(sec / 86400)}d ago`;
+    return d.toLocaleDateString();
   }
 
   return (
@@ -58,21 +99,30 @@ export function Feed() {
             <section className="create-post-section">
               <h2>Create Post</h2>
 
-              <textarea
-                placeholder="Share a study accomplishment, question, or resource…"
-                rows={4}
-              />
+              <form onSubmit={handleCreatePost}>
+                <textarea
+                  placeholder="Share a study accomplishment, question, or resource…"
+                  rows={4}
+                  value={postText}
+                  onChange={(e) => setPostText(e.target.value)}
+                />
 
-              <div className="post-controls">
-                <select defaultValue="">
-                  <option value="">Select category</option>
-                  <option value="question">Question</option>
-                  <option value="accomplishment">Accomplishments</option>
-                  <option value="resource">Resource</option>
-                </select>
+                <div className="post-controls">
+                  <select
+                    value={postCategory}
+                    onChange={(e) => setPostCategory(e.target.value)}
+                  >
+                    <option value="">Select category</option>
+                    <option value="question">Question</option>
+                    <option value="accomplishment">Accomplishments</option>
+                    <option value="resource">Resource</option>
+                  </select>
 
-                <button>Post</button>
-              </div>
+                  <button type="submit" disabled={!postText.trim()}>
+                    Post
+                  </button>
+                </div>
+              </form>
             </section>
 
             <h1>Feed</h1>
@@ -127,72 +177,29 @@ export function Feed() {
             </section>
 
             <section className="posts-section">
-              <article className="post-card">
-                <div className="post-avatar">AJ</div>
-                <div className="post-content">
-                  <div className="post-header">
-                    <span className="post-author">Alex Johnson</span>
-                    <span className="post-meta">CS 224 · 10m ago</span>
-                  </div>
-                  <p className="post-text">Anyone understand recursion base cases?</p>
-                  <div className="post-actions">
-                    <button>Like</button>
-                    <button>Comment</button>
-                    <button>Save</button>
-                  </div>
-                </div>
-              </article>
-
-              <article className="post-card">
-                <div className="post-avatar">SJ</div>
-                <div className="post-content">
-                  <div className="post-header">
-                    <span className="post-author">Sarah Jones</span>
-                    <span className="post-meta">CS 260 · 1h ago</span>
-                  </div>
-                  <p className="post-text">Finished CS 260 deploy step ✅</p>
-                  <div className="post-actions">
-                    <button>Like</button>
-                    <button>Comment</button>
-                    <button>Save</button>
-                  </div>
-                </div>
-              </article>
-
-              <article className="post-card">
-                <div className="post-avatar">MH</div>
-                <div className="post-content">
-                  <div className="post-header">
-                    <span className="post-author">Mike Hall</span>
-                    <span className="post-meta">CS 224 · 3h ago</span>
-                  </div>
-                  <p className="post-text">Here’s a great regex cheat sheet</p>
-                  <div className="resource-card">
-                    <p>Regex Cheat Sheet (PDF)</p>
-                  </div>
-                  <div className="post-actions">
-                    <button>Like</button>
-                    <button>Comment</button>
-                    <button>Save</button>
-                  </div>
-                </div>
-              </article>
-
-              <article className="post-card">
-                <div className="post-avatar">KL</div>
-                <div className="post-content">
-                  <div className="post-header">
-                    <span className="post-author">Kevin Lee</span>
-                    <span className="post-meta">Algorithms · Yesterday</span>
-                  </div>
-                  <p className="post-text">Study group tonight at 7pm?</p>
-                  <div className="post-actions">
-                    <button>Like</button>
-                    <button>Comment</button>
-                    <button>Save</button>
-                  </div>
-                </div>
-              </article>
+              {posts.length === 0 ? (
+                <p className="feed-no-posts">No posts yet. Create one above.</p>
+              ) : (
+                posts.map((post) => (
+                  <article key={post.id} className="post-card">
+                    <div className="post-avatar">{authorDisplay(post.author)}</div>
+                    <div className="post-content">
+                      <div className="post-header">
+                        <span className="post-author">{post.author}</span>
+                        <span className="post-meta">
+                          {post.category ? post.category + ' · ' : ''}{timeAgo(post.createdAt)}
+                        </span>
+                      </div>
+                      <p className="post-text">{post.text}</p>
+                      <div className="post-actions">
+                        <button type="button">Like</button>
+                        <button type="button">Comment</button>
+                        <button type="button">Save</button>
+                      </div>
+                    </div>
+                  </article>
+                ))
+              )}
             </section>
           </div>
 
