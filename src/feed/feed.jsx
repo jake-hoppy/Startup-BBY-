@@ -191,11 +191,6 @@ export function Feed() {
                         </span>
                       </div>
                       <p className="post-text">{post.text}</p>
-                      <div className="post-actions">
-                        <button type="button">Like</button>
-                        <button type="button">Comment</button>
-                        <button type="button">Save</button>
-                      </div>
                     </div>
                   </article>
                 ))
