@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CreateAccountModal } from './CreateAccountModal';
+import { validateLogin, setCurrentUser, userExists, addUser } from '../auth';
 import './login.css';
 
 export function Login() {
   const navigate = useNavigate();
   const [showCreateAccount, setShowCreateAccount] = useState(false);
+  const [createAccountError, setCreateAccountError] = useState('');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -13,21 +15,29 @@ export function Login() {
 
   function handleSubmit(e) {
     e.preventDefault();
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
     if (!emailRegex.test(email)) {
       setErrorMsg('Please enter a valid email address');
       return;
     }
-
-    // VERY simple fake login (same as your HTML)
-    if (email === 'student@example.com' && password === 'password') {
-      localStorage.setItem('loggedIn', 'true');
-      navigate('/'); // home route
+    const loggedInEmail = validateLogin(email, password);
+    if (loggedInEmail) {
+      setCurrentUser(loggedInEmail);
+      navigate('/home');
     } else {
-      setErrorMsg('Invalid username or password');
+      setErrorMsg('Invalid email or password');
     }
+  }
+
+  function handleCreateAccount({ email: newEmail, password: newPassword }) {
+    setCreateAccountError('');
+    if (userExists(newEmail)) {
+      setCreateAccountError('Email already registered');
+      return;
+    }
+    addUser(newEmail, newPassword);
+    setShowCreateAccount(false);
+    navigate('/home');
   }
 
   return (
@@ -102,8 +112,9 @@ export function Login() {
 
       <CreateAccountModal
         isOpen={showCreateAccount}
-        onClose={() => setShowCreateAccount(false)}
-        onSubmit={() => setShowCreateAccount(false)}
+        onClose={() => { setShowCreateAccount(false); setCreateAccountError(''); }}
+        onSubmit={handleCreateAccount}
+        error={createAccountError}
       />
     </div>
   );
