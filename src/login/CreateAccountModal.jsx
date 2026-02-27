@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
  * Create Account modal for the login page.
  * Props: isOpen, onClose, onSubmit (optional; for now just close on submit)
  */
-export function CreateAccountModal({ isOpen, onClose, onSubmit }) {
+export function CreateAccountModal({ isOpen, onClose, onSubmit, error = '' }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -71,8 +71,14 @@ export function CreateAccountModal({ isOpen, onClose, onSubmit }) {
         </div>
 
         <p className="sl-modal-subtitle">
-          Enter your email and a password. For now this just returns you to the login page.
+          Enter your email and a password. You can then use them to log in.
         </p>
+
+        {error && (
+          <p id="create-account-error" className="sl-modal-hint" style={{ color: '#ff8b8b' }} aria-live="polite">
+            {error}
+          </p>
+        )}
 
         <form onSubmit={handleSubmit} className="sl-modal-form">
           <label className="sl-modal-label">
