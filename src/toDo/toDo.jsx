@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AddClassModal } from './AddClassModal';
 import { MakeClassModal } from './MakeClassModal';
 import { AddAssignmentModal } from './AddAssignmentModal';
 import './toDo.css';
 
 export function ToDo() {
+  const navigate = useNavigate();
   // --- Calendar state + helpers ---
   const MONTH_NAMES = useMemo(
     () => [
@@ -54,14 +55,18 @@ export function ToDo() {
   const [isMakeClassOpen, setIsMakeClassOpen] = useState(false);
   const [isAddAssignmentOpen, setIsAddAssignmentOpen] = useState(false);
 
-  // Classes list (used for dropdown + filter buttons); can add via Add Class modal
+  // Classes list (not per-user yet)
   const [classes, setClasses] = useState([]);
 
   // Filter state (All or a specific class)
   const [selectedClass, setSelectedClass] = useState('All');
 
-  // Assignments state
+  // Assignments state (not per-user yet)
   const [assignments, setAssignments] = useState([]);
+
+  function handleLogout() {
+    navigate('/login');
+  }
 
   // Build calendar cells with a dateKey (YYYY-MM-DD) for each day cell
   const calendarCells = useMemo(() => {
@@ -164,9 +169,9 @@ export function ToDo() {
             </li>
           </ul>
 
-          <Link to="/login" className="nav-logout-link">
-            <button type="button">Logout</button>
-          </Link>
+          <button type="button" className="nav-logout-link" onClick={handleLogout}>
+            Logout
+          </button>
         </nav>
       </header>
 
