@@ -1,10 +1,21 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { setCurrentUser } from '../auth';
+import { setCurrentUser, getCurrentUser, getAssignments } from '../auth';
 import './feed.css';
 
 export function Feed() {
   const navigate = useNavigate();
+  const currentUser = getCurrentUser();
+
+  // Same assignments as To Do — load from localStorage per user, sorted by due date
+  const upcomingDue = useMemo(() => {
+    if (!currentUser) return [];
+    const list = getAssignments(currentUser);
+    return list
+      .slice()
+      .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
+      .slice(0, 5);
+  }, [currentUser]);
 
   function handleLogout() {
     setCurrentUser(null);
@@ -222,7 +233,17 @@ export function Feed() {
 
             <section className="sidebar-card">
               <h3>Upcoming Due</h3>
-              <p>Lab 3 – Friday</p>
+              {upcomingDue.length === 0 ? (
+                <p className="feed-upcoming-empty">No upcoming assignments. Add some in <Link to="/todo">To Do</Link>.</p>
+              ) : (
+                <ul className="feed-upcoming-list">
+                  {upcomingDue.map((a) => (
+                    <li key={a.id}>
+                      <strong>{a.className}:</strong> {a.name} – {a.dueDate}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
 
             <section className="sidebar-card">

@@ -112,3 +112,30 @@
   border: 1px solid rgba(255,255,255,.12);
   background: rgba(0,0,0,.16);
 }
+
+.feed-upcoming-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.feed-upcoming-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.feed-upcoming-list li:last-child {
+  border-bottom: none;
+}
+
+.feed-upcoming-empty {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+}
+
+.feed-upcoming-empty a {
+  color: var(--accent);
+}
