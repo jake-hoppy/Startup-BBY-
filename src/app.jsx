@@ -8,7 +8,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Home } from './home/home';
 import { Login } from './login/login';
 import { Feed } from './feed/feed';
-import { ToDo } from './toDo/toDo';
+import { ToDo } from './ToDo/toDo';
 
 export default function App() {
   return (
