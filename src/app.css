@@ -141,8 +141,13 @@ nav a:hover {
 /* Logout button (clears currentUser and navigates to login) */
 nav a.nav-logout-link,
 nav button.nav-logout-link {
-  padding: 0;
+  padding: 10px 14px;
   border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  box-sizing: border-box;
 }
 nav a.nav-logout-link:hover {
   background: transparent;
