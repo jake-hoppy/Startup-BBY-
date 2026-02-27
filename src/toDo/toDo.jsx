@@ -247,7 +247,7 @@ export function ToDo() {
                       <div
                         key={i}
                         className={`calendar-day ${
-                          cell.type === 'header' ? 'calendar-day-header' : ''
+                          cell.type === 'header' ? 'calendar-day-label' : ''
                         } ${
                           cell.type === 'day' && !cell.inMonth ? 'calendar-day-outside' : ''
                         }`}
