@@ -1,12 +1,15 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AddClassModal } from './AddClassModal';
 import { MakeClassModal } from './MakeClassModal';
 import { AddAssignmentModal } from './AddAssignmentModal';
+import { getCurrentUser, getClasses, saveClasses, getAssignments, saveAssignments, setCurrentUser } from '../auth';
 import './toDo.css';
 
 export function ToDo() {
   const navigate = useNavigate();
+  const currentUser = getCurrentUser();
+
   // --- Calendar state + helpers ---
   const MONTH_NAMES = useMemo(
     () => [
@@ -55,16 +58,25 @@ export function ToDo() {
   const [isMakeClassOpen, setIsMakeClassOpen] = useState(false);
   const [isAddAssignmentOpen, setIsAddAssignmentOpen] = useState(false);
 
-  // Classes list (not per-user yet)
-  const [classes, setClasses] = useState([]);
+  // Classes list — load from local storage per user, save on change
+  const [classes, setClasses] = useState(() => (currentUser ? getClasses(currentUser) : []));
 
   // Filter state (All or a specific class)
   const [selectedClass, setSelectedClass] = useState('All');
 
-  // Assignments state (not per-user yet)
-  const [assignments, setAssignments] = useState([]);
+  // Assignments — load from local storage per user, save on change
+  const [assignments, setAssignments] = useState(() => (currentUser ? getAssignments(currentUser) : []));
+
+  useEffect(() => {
+    if (currentUser) saveClasses(currentUser, classes);
+  }, [currentUser, classes]);
+
+  useEffect(() => {
+    if (currentUser) saveAssignments(currentUser, assignments);
+  }, [currentUser, assignments]);
 
   function handleLogout() {
+    setCurrentUser(null);
     navigate('/login');
   }
 
