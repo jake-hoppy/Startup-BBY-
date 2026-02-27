@@ -80,3 +80,18 @@ export function saveAssignments(email, assignments) {
   const key = userKey(email, 'assignments');
   if (key) localStorage.setItem(key, JSON.stringify(assignments));
 }
+
+export function getPosts(email) {
+  const key = userKey(email, 'posts');
+  if (!key) return [];
+  try {
+    return JSON.parse(localStorage.getItem(key) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+export function savePosts(email, posts) {
+  const key = userKey(email, 'posts');
+  if (key) localStorage.setItem(key, JSON.stringify(posts));
+}
