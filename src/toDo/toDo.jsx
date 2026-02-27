@@ -48,20 +48,20 @@ export function ToDo() {
     });
   }
 
-  // ✅ Modals
+  // Modals
   const [isAddClassOpen, setIsAddClassOpen] = useState(false);
   const [isAddAssignmentOpen, setIsAddAssignmentOpen] = useState(false);
 
-  // ✅ Classes list (used for dropdown + filter buttons)
-  const classes = useMemo(() => ['CS 260', 'CS 224', 'Algorithms'], []);
+  // Classes list (used for dropdown + filter buttons); can add via Add Class modal
+  const [classes, setClasses] = useState(['CS 260', 'CS 224', 'Algorithms']);
 
-  // ✅ Filter state (All or a specific class)
+  // Filter state (All or a specific class)
   const [selectedClass, setSelectedClass] = useState('All');
 
-  // ✅ Assignments state
+  // Assignments state
   const [assignments, setAssignments] = useState([]);
 
-  // ✅ Build calendar cells with a dateKey (YYYY-MM-DD) for each day cell
+  // Build calendar cells with a dateKey (YYYY-MM-DD) for each day cell
   const calendarCells = useMemo(() => {
     const firstDow = new Date(viewYear, viewMonth, 1).getDay();
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -337,8 +337,10 @@ export function ToDo() {
       <AddClassModal
         isOpen={isAddClassOpen}
         onClose={() => setIsAddClassOpen(false)}
-        onSubmit={({ url, label }) => {
-          console.log('Import iCal:', { url, label });
+        onSubmit={({ className: newClassName }) => {
+          setClasses((prev) =>
+            prev.includes(newClassName) ? prev : [...prev, newClassName]
+          );
         }}
       />
 
