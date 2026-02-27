@@ -10,10 +10,16 @@ export function Feed() {
   const [postText, setPostText] = useState('');
   const [postCategory, setPostCategory] = useState('');
   const [posts, setPosts] = useState(() => (currentUser ? getPosts(currentUser) : []));
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     if (currentUser) setPosts(getPosts(currentUser));
   }, [currentUser]);
+
+  const filteredPosts = useMemo(() => {
+    if (filter === 'all') return posts;
+    return posts.filter((p) => p.category === filter);
+  }, [posts, filter]);
 
   const upcomingDue = useMemo(() => {
     if (!currentUser) return [];
@@ -128,10 +134,34 @@ export function Feed() {
             <h1>Feed</h1>
 
             <section className="feed-filters">
-              <button>All</button>
-              <button>Questions</button>
-              <button>Accomplishments</button>
-              <button>Resources</button>
+              <button
+                type="button"
+                onClick={() => setFilter('all')}
+                aria-pressed={filter === 'all'}
+              >
+                All
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilter('question')}
+                aria-pressed={filter === 'question'}
+              >
+                Questions
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilter('accomplishment')}
+                aria-pressed={filter === 'accomplishment'}
+              >
+                Accomplishments
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilter('resource')}
+                aria-pressed={filter === 'resource'}
+              >
+                Resources
+              </button>
             </section>
 
             <section className="websocket-placeholder">
@@ -177,10 +207,14 @@ export function Feed() {
             </section>
 
             <section className="posts-section">
-              {posts.length === 0 ? (
-                <p className="feed-no-posts">No posts yet. Create one above.</p>
+              {filteredPosts.length === 0 ? (
+                <p className="feed-no-posts">
+                  {posts.length === 0
+                    ? 'No posts yet. Create one above.'
+                    : 'No posts in this category.'}
+                </p>
               ) : (
-                posts.map((post) => (
+                filteredPosts.map((post) => (
                   <article key={post.id} className="post-card">
                     <div className="post-avatar">{authorDisplay(post.author)}</div>
                     <div className="post-content">

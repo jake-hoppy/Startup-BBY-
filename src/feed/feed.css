@@ -19,6 +19,11 @@
   border-radius: 999px;
 }
 
+.feed-filters button[aria-pressed="true"] {
+  background: rgba(6,182,212,.25);
+  border-color: rgba(6,182,212,.5);
+}
+
 .create-post-section .post-controls {
   display: flex;
   gap: 10px;
