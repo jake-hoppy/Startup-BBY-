@@ -104,8 +104,8 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **All functionality implemented or mocked out** - I did not complete this part of the deliverable.
-- [ ] **Hooks** - I did not complete this part of the deliverable.
+- [x] **All functionality implemented or mocked out** - I have multiple React components that implement or mock login, registration, logout, home dashboard, feed, and to-do. These come especially in the addition of classes and assigments which are saved within local storage as well as changing the calender. As well as posts that are categorized and saved. The login requires authentication as well and information is stored per user.
+- [x] **Hooks** - useState is used for form and UI state in Login (email, password, errors, create-account modal), CreateAccountModal, Feed (post text, category, posts, filter), ToDo (calendar view, modal open flags, classes, selected class, assignments), and all three ToDo modals (form fields). useEffect is used to load/sync data (e.g. Feed posts, ToDo classes and assignments) and to reset/focus modal forms when opened. useMemo is used in Home and ToDo for derived state (e.g. assignment stats, filtered lists).
 
 ## 🚀 Service deliverable
 
