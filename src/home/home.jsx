@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { getAssignments } from '../auth';
+import { api } from '../api';
 import './home.css';
 
 function formatShortDay(ymd) {
@@ -21,10 +21,15 @@ function getEndOfWeekStr(todayStr) {
 export function Home() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const assignments = useMemo(
-    () => (user?.email ? getAssignments(user.email) : []),
-    [user?.email]
-  );
+  const [assignments, setAssignments] = useState([]);
+
+  useEffect(() => {
+    if (!user?.email) return;
+    api('/api/assignments')
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setAssignments)
+      .catch(() => setAssignments([]));
+  }, [user?.email]);
 
   const { overdue, dueSoonCount, nextDue, dueThisWeekCount } = useMemo(() => {
     const today = new Date();
@@ -124,7 +129,7 @@ export function Home() {
             </section>
 
             <section className="focus-section">
-              <h2>Today’s Focus</h2>
+              <h2>Today's Focus</h2>
               <ul className="focus-list">
                 <li>
                   You have {dueThisWeekCount} assignment{dueThisWeekCount !== 1 ? 's' : ''} due this week

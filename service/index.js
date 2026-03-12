@@ -10,6 +10,9 @@ const authCookieName = 'token';
 // Temporary in-memory storage (no database). Data is lost when the service restarts.
 const users = [];
 const tasks = [];
+const classes = [];       // { owner, name }
+const assignments = [];   // { id, owner, name, dueDate, className }
+const posts = [];         // { id, owner, text, category, createdAt }
 
 app.use(express.json());
 app.use(cookieParser());
@@ -115,6 +118,107 @@ apiRouter.delete('/tasks/:id', verifyAuth, (req, res) => {
   }
   tasks.splice(i, 1);
   res.status(204).end();
+});
+
+// ---- Classes ----
+
+apiRouter.get('/classes', verifyAuth, (req, res) => {
+  const list = classes
+    .filter((c) => c.owner === req.user.email)
+    .map((c) => c.name);
+  res.send(list);
+});
+
+apiRouter.post('/classes', verifyAuth, (req, res) => {
+  const name = (req.body?.name || req.body?.className || '').trim();
+  if (!name) {
+    res.status(400).send({ msg: 'Class name required' });
+    return;
+  }
+  const owner = req.user.email;
+  const exists = classes.some((c) => c.owner === owner && c.name === name);
+  if (exists) {
+    res.send(classes.filter((c) => c.owner === owner).map((c) => c.name));
+    return;
+  }
+  classes.push({ owner, name });
+  res.status(201).send(classes.filter((c) => c.owner === owner).map((c) => c.name));
+});
+
+// ---- Assignments ----
+
+apiRouter.get('/assignments', verifyAuth, (req, res) => {
+  const list = assignments
+    .filter((a) => a.owner === req.user.email)
+    .map((a) => ({ id: a.id, name: a.name, dueDate: a.dueDate, className: a.className }));
+  res.send(list);
+});
+
+apiRouter.post('/assignments', verifyAuth, (req, res) => {
+  const { name, dueDate, className } = req.body || {};
+  if (!name || !dueDate) {
+    res.status(400).send({ msg: 'Name and dueDate required' });
+    return;
+  }
+  const assignment = {
+    id: uuid.v4(),
+    owner: req.user.email,
+    name: String(name).trim(),
+    dueDate: String(dueDate).trim(),
+    className: String(className || '').trim(),
+  };
+  assignments.push(assignment);
+  res.status(201).send(assignment);
+});
+
+apiRouter.delete('/assignments/:id', verifyAuth, (req, res) => {
+  const i = assignments.findIndex(
+    (a) => a.id === req.params.id && a.owner === req.user.email
+  );
+  if (i === -1) {
+    res.status(404).send({ msg: 'Not found' });
+    return;
+  }
+  assignments.splice(i, 1);
+  res.status(204).end();
+});
+
+// ---- Posts ----
+
+apiRouter.get('/posts', verifyAuth, (req, res) => {
+  const list = posts
+    .filter((p) => p.owner === req.user.email)
+    .map((p) => ({
+      id: p.id,
+      author: p.owner,
+      text: p.text,
+      category: p.category,
+      createdAt: p.createdAt,
+    }));
+  res.send(list);
+});
+
+apiRouter.post('/posts', verifyAuth, (req, res) => {
+  const text = (req.body?.text || '').trim();
+  if (!text) {
+    res.status(400).send({ msg: 'Text required' });
+    return;
+  }
+  const post = {
+    id: uuid.v4(),
+    owner: req.user.email,
+    text,
+    category: (req.body?.category || 'post').trim() || 'post',
+    createdAt: new Date().toISOString(),
+  };
+  posts.push(post);
+  res.status(201).send({
+    id: post.id,
+    author: post.owner,
+    text: post.text,
+    category: post.category,
+    createdAt: post.createdAt,
+  });
 });
 
 // ---- Helpers ----

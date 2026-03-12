@@ -1,23 +1,33 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { getAssignments, getPosts, savePosts } from '../auth';
+import { api } from '../api';
 import './feed.css';
 
 export function Feed() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const currentUser = user?.email;
 
   const [postText, setPostText] = useState('');
   const [postCategory, setPostCategory] = useState('');
-  const [posts, setPosts] = useState(() => (currentUser ? getPosts(currentUser) : []));
+  const [posts, setPosts] = useState([]);
+  const [assignments, setAssignments] = useState([]);
   const [filter, setFilter] = useState('all');
   const [studyTip, setStudyTip] = useState({ text: null, loading: true, error: null });
 
   useEffect(() => {
-    if (currentUser) setPosts(getPosts(currentUser));
-  }, [currentUser]);
+    api('/api/posts')
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setPosts)
+      .catch(() => setPosts([]));
+  }, [user?.email]);
+
+  useEffect(() => {
+    api('/api/assignments')
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setAssignments)
+      .catch(() => setAssignments([]));
+  }, [user?.email]);
 
   // Third-party API: fetch a short advice-style quote for "Study Tip of the Day"
   useEffect(() => {
@@ -44,35 +54,35 @@ export function Feed() {
   }, [posts, filter]);
 
   const upcomingDue = useMemo(() => {
-    if (!currentUser) return [];
-    const list = getAssignments(currentUser);
-    return list
+    return assignments
       .slice()
       .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
       .slice(0, 5);
-  }, [currentUser]);
+  }, [assignments]);
 
   async function handleLogout() {
     await logout();
     navigate('/login');
   }
 
-  function handleCreatePost(e) {
+  async function handleCreatePost(e) {
     e.preventDefault();
     const trimmed = postText.trim();
-    if (!trimmed || !currentUser) return;
-    const newPost = {
-      id: crypto.randomUUID?.() ?? String(Date.now()),
-      author: currentUser,
-      text: trimmed,
-      category: postCategory || 'post',
-      createdAt: new Date().toISOString(),
-    };
-    const next = [newPost, ...posts];
-    setPosts(next);
-    savePosts(currentUser, next);
-    setPostText('');
-    setPostCategory('');
+    if (!trimmed) return;
+    try {
+      const res = await api('/api/posts', {
+        method: 'POST',
+        body: JSON.stringify({ text: trimmed, category: postCategory || 'post' }),
+      });
+      if (res.ok) {
+        const created = await res.json();
+        setPosts((prev) => [created, ...prev]);
+        setPostText('');
+        setPostCategory('');
+      }
+    } catch {
+      // ignore
+    }
   }
 
   function authorDisplay(email) {

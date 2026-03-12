@@ -4,7 +4,7 @@ import { AddClassModal } from './AddClassModal';
 import { MakeClassModal } from './MakeClassModal';
 import { AddAssignmentModal } from './AddAssignmentModal';
 import { useAuth } from '../contexts/AuthContext';
-import { getClasses, saveClasses, getAssignments, saveAssignments } from '../auth';
+import { api } from '../api';
 import './toDo.css';
 
 export function ToDo() {
@@ -60,14 +60,29 @@ export function ToDo() {
   const [isMakeClassOpen, setIsMakeClassOpen] = useState(false);
   const [isAddAssignmentOpen, setIsAddAssignmentOpen] = useState(false);
 
-  // Classes list — load from local storage per user, save on change
-  const [classes, setClasses] = useState(() => (currentUser ? getClasses(currentUser) : []));
+  // Classes and assignments from backend
+  const [classes, setClasses] = useState([]);
+  const [assignments, setAssignments] = useState([]);
+
+  const fetchClasses = useCallback(async () => {
+    const res = await api('/api/classes');
+    if (res.ok) setClasses(await res.json());
+  }, []);
+
+  const fetchAssignments = useCallback(async () => {
+    const res = await api('/api/assignments');
+    if (res.ok) setAssignments(await res.json());
+  }, []);
+
+  useEffect(() => {
+    if (currentUser) {
+      fetchClasses();
+      fetchAssignments();
+    }
+  }, [currentUser, fetchClasses, fetchAssignments]);
 
   // Filter state (All or a specific class)
   const [selectedClass, setSelectedClass] = useState('All');
-
-  // Assignments — load from local storage per user, save on change
-  const [assignments, setAssignments] = useState(() => (currentUser ? getAssignments(currentUser) : []));
 
   // Tasks from backend API
   const [apiTasks, setApiTasks] = useState([]);
@@ -77,7 +92,7 @@ export function ToDo() {
   const fetchTasks = useCallback(async () => {
     setTasksLoading(true);
     try {
-      const res = await fetch('/api/tasks', { credentials: 'include' });
+      const res = await api('/api/tasks');
       if (res.ok) {
         const data = await res.json();
         setApiTasks(Array.isArray(data) ? data : []);
@@ -98,10 +113,8 @@ export function ToDo() {
     const title = taskTitle.trim();
     if (!title) return;
     try {
-      const res = await fetch('/api/tasks', {
+      const res = await api('/api/tasks', {
         method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title }),
       });
       if (res.ok) {
@@ -113,14 +126,6 @@ export function ToDo() {
       // ignore
     }
   }
-
-  useEffect(() => {
-    if (currentUser) saveClasses(currentUser, classes);
-  }, [currentUser, classes]);
-
-  useEffect(() => {
-    if (currentUser) saveAssignments(currentUser, assignments);
-  }, [currentUser, assignments]);
 
   async function handleLogout() {
     await logout();
@@ -432,12 +437,14 @@ export function ToDo() {
       <AddClassModal
         isOpen={isAddClassOpen}
         onClose={() => setIsAddClassOpen(false)}
-        onSubmit={({ url, label }) => {
-          if (label?.trim()) {
-            setClasses((prev) =>
-              prev.includes(label.trim()) ? prev : [...prev, label.trim()]
-            );
-          }
+        onSubmit={async ({ url, label }) => {
+          const name = (label || '').trim();
+          if (!name) return;
+          const res = await api('/api/classes', {
+            method: 'POST',
+            body: JSON.stringify({ name }),
+          });
+          if (res.ok) setClasses(await res.json());
         }}
       />
 
@@ -445,10 +452,14 @@ export function ToDo() {
       <MakeClassModal
         isOpen={isMakeClassOpen}
         onClose={() => setIsMakeClassOpen(false)}
-        onSubmit={({ className: newClassName }) => {
-          setClasses((prev) =>
-            prev.includes(newClassName) ? prev : [...prev, newClassName]
-          );
+        onSubmit={async ({ className: newClassName }) => {
+          const name = (newClassName || '').trim();
+          if (!name) return;
+          const res = await api('/api/classes', {
+            method: 'POST',
+            body: JSON.stringify({ name }),
+          });
+          if (res.ok) setClasses(await res.json());
         }}
       />
 
@@ -457,15 +468,15 @@ export function ToDo() {
         isOpen={isAddAssignmentOpen}
         onClose={() => setIsAddAssignmentOpen(false)}
         classes={classes}
-        onSubmit={({ name, dueDate, className }) => {
-          const newAssignment = {
-            id: crypto.randomUUID?.() ?? String(Date.now()),
-            name,
-            dueDate, 
-            className,
-          };
-
-          setAssignments((prev) => [...prev, newAssignment]);
+        onSubmit={async ({ name, dueDate, className }) => {
+          const res = await api('/api/assignments', {
+            method: 'POST',
+            body: JSON.stringify({ name, dueDate, className: className || '' }),
+          });
+          if (res.ok) {
+            const created = await res.json();
+            setAssignments((prev) => [...prev, created]);
+          }
         }}
       />
     </>

@@ -1,21 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { api } from '../api';
 
 const AuthContext = createContext(null);
-
-function authFetch(path, options = {}) {
-  return fetch(path, {
-    ...options,
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-  });
-}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
   const checkAuth = useCallback(async () => {
     try {
-      const res = await authFetch('/api/user/me');
+      const res = await api('/api/user/me');
       if (res.ok) {
         const data = await res.json();
         setUser({ username: data.username, email: data.email });
@@ -32,7 +25,7 @@ export function AuthProvider({ children }) {
   }, [checkAuth]);
 
   const login = useCallback(async (email, password) => {
-    const res = await authFetch('/api/auth/login', {
+    const res = await api('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
@@ -46,7 +39,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signup = useCallback(async (username, email, password) => {
-    const res = await authFetch('/api/auth/create', {
+    const res = await api('/api/auth/create', {
       method: 'POST',
       body: JSON.stringify({ username, email, password }),
     });
@@ -64,7 +57,7 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     try {
-      await authFetch('/api/auth/logout', { method: 'DELETE' });
+      await api('/api/auth/logout', { method: 'DELETE' });
     } finally {
       setUser(null);
     }
