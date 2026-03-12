@@ -124,7 +124,7 @@ async function createUser(username, email, password) {
     password: await bcrypt.hash(password, 10),
     token: uuid.v4(),
   };
-  users.push(user);
+  users.push(user); // store the user in memory
   return user;
 }
 
