@@ -11,7 +11,7 @@ export function Feed() {
   const [postCategory, setPostCategory] = useState('');
   const [posts, setPosts] = useState(() => (currentUser ? getPosts(currentUser) : []));
   const [filter, setFilter] = useState('all');
-  const [studyTip, setStudyTip] = useState({ text: null, author: null, loading: true, error: null });
+  const [studyTip, setStudyTip] = useState({ text: null, loading: true, error: null });
 
   useEffect(() => {
     if (currentUser) setPosts(getPosts(currentUser));
@@ -29,7 +29,7 @@ export function Feed() {
       })
       .then((data) => {
         const text = data?.slip?.advice || 'Take a short break and review your notes.';
-        setStudyTip({ text, author: 'Advice Slip', loading: false, error: null });
+        setStudyTip({ text, loading: false, error: null });
       })
       .catch((err) => {
         setStudyTip((s) => ({ ...s, loading: false, error: err.message || 'Unable to load quote.' }));
@@ -255,15 +255,12 @@ export function Feed() {
           <aside className="feed-sidebar">
             <section className="sidebar-card api-placeholder">
               <h3>Study Tip of the Day</h3>
-              <p className="sidebar-subtitle">Productivity quote from Quotable API</p>
+              <p className="sidebar-subtitle">Advice from api.adviceslip.com</p>
               <div className="study-tip-content">
                 {studyTip.loading && <p>Loading…</p>}
                 {studyTip.error && <p className="study-tip-error">{studyTip.error}</p>}
                 {!studyTip.loading && !studyTip.error && studyTip.text && (
-                  <>
-                    <p className="study-tip-quote">"{studyTip.text}"</p>
-                    {studyTip.author && <p className="study-tip-author">— {studyTip.author}</p>}
-                  </>
+                  <p className="study-tip-quote">"{studyTip.text}"</p>
                 )}
               </div>
             </section>
