@@ -38,19 +38,20 @@ apiRouter.post('/auth/create', async (req, res) => {
 apiRouter.post('/auth/login', async (req, res) => {
   const { email, password } = req.body || {};
   const user = findUserByEmail(email); // find the user by email
+  // compare password with bcrypt (plain text vs stored hash)
   if (!user || !(await bcrypt.compare(password || '', user.password))) {
     res.status(401).send({ msg: 'Unauthorized' });
     return;
   }
-  user.token = uuid.v4();
+  user.token = uuid.v4(); // create a token if correct
   setAuthCookie(res, user.token);
   res.send({ username: user.username, email: user.email });
 });
 
 apiRouter.delete('/auth/logout', (req, res) => {
   const user = findUserByToken(req.cookies[authCookieName]);
-  if (user) delete user.token;
-  res.clearCookie(authCookieName);
+  if (user) delete user.token; // remove the stored token
+  res.clearCookie(authCookieName); // clear the cookie
   res.status(204).end();
 });
 
