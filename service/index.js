@@ -7,9 +7,9 @@ const app = express();
 const port = process.argv.length > 2 ? process.argv[2] : 4000;
 const authCookieName = 'token';
 
-// In-memory stores (reset when service restarts)
-let users = [];
-let tasks = [];
+// Temporary in-memory storage (no database). Data is lost when the service restarts.
+const users = [];
+const tasks = [];
 
 app.use(express.json());
 app.use(cookieParser());
