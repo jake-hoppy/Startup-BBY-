@@ -37,7 +37,7 @@ apiRouter.post('/auth/create', async (req, res) => {
 
 apiRouter.post('/auth/login', async (req, res) => {
   const { email, password } = req.body || {};
-  const user = findUserByEmail(email);
+  const user = findUserByEmail(email); // find the user by email
   if (!user || !(await bcrypt.compare(password || '', user.password))) {
     res.status(401).send({ msg: 'Unauthorized' });
     return;
