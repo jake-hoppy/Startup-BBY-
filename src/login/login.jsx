@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CreateAccountModal } from './CreateAccountModal';
-import { validateLogin, setCurrentUser, userExists, addUser } from '../auth';
+import { useAuth } from '../contexts/AuthContext';
 import './login.css';
 
 export function Login() {
   const navigate = useNavigate();
+  const { login, signup } = useAuth();
   const [showCreateAccount, setShowCreateAccount] = useState(false);
   const [createAccountError, setCreateAccountError] = useState('');
 
@@ -13,31 +14,31 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
+    setErrorMsg('');
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setErrorMsg('Please enter a valid email address');
       return;
     }
-    const loggedInEmail = validateLogin(email, password);
-    if (loggedInEmail) {
-      setCurrentUser(loggedInEmail);
+    try {
+      await login(email, password);
       navigate('/home');
-    } else {
-      setErrorMsg('Invalid email or password');
+    } catch (err) {
+      setErrorMsg(err.message || 'Invalid email or password');
     }
   }
 
-  function handleCreateAccount({ email: newEmail, password: newPassword }) {
+  async function handleCreateAccount({ username, email: newEmail, password: newPassword }) {
     setCreateAccountError('');
-    if (userExists(newEmail)) {
-      setCreateAccountError('Email already registered');
-      return;
+    try {
+      await signup(username, newEmail, newPassword);
+      setShowCreateAccount(false);
+      navigate('/home');
+    } catch (err) {
+      setCreateAccountError(err.message === 'Existing user' ? 'Email already registered' : err.message);
     }
-    addUser(newEmail, newPassword);
-    setShowCreateAccount(false);
-    navigate('/home');
   }
 
   return (
@@ -102,7 +103,7 @@ export function Login() {
           </section>
 
           <div className="auth-meta">
-            <span>Don’t have an account?</span>
+            <span>Don't have an account?</span>
             <button type="button" className="auth-meta-link" onClick={() => setShowCreateAccount(true)}>
               Create one
             </button>

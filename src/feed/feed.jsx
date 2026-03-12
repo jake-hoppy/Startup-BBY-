@@ -1,11 +1,13 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { setCurrentUser, getCurrentUser, getAssignments, getPosts, savePosts } from '../auth';
+import { useAuth } from '../contexts/AuthContext';
+import { getAssignments, getPosts, savePosts } from '../auth';
 import './feed.css';
 
 export function Feed() {
   const navigate = useNavigate();
-  const currentUser = getCurrentUser();
+  const { user, logout } = useAuth();
+  const currentUser = user?.email;
 
   const [postText, setPostText] = useState('');
   const [postCategory, setPostCategory] = useState('');
@@ -50,8 +52,8 @@ export function Feed() {
       .slice(0, 5);
   }, [currentUser]);
 
-  function handleLogout() {
-    setCurrentUser(null);
+  async function handleLogout() {
+    await logout();
     navigate('/login');
   }
 

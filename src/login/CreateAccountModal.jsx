@@ -5,11 +5,13 @@ import React, { useEffect, useMemo, useState } from 'react';
  * Props: isOpen, onClose, onSubmit (optional; for now just close on submit)
  */
 export function CreateAccountModal({ isOpen, onClose, onSubmit, error = '' }) {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   useEffect(() => {
     if (isOpen) {
+      setUsername('');
       setEmail('');
       setPassword('');
     }
@@ -25,17 +27,18 @@ export function CreateAccountModal({ isOpen, onClose, onSubmit, error = '' }) {
   }, [isOpen, onClose]);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const trimmedUsername = username.trim();
   const trimmedEmail = email.trim();
   const isValid = useMemo(() => {
-    return emailRegex.test(trimmedEmail) && password.length > 0;
-  }, [trimmedEmail, password]);
+    return trimmedUsername.length > 0 && emailRegex.test(trimmedEmail) && password.length > 0;
+  }, [trimmedUsername, trimmedEmail, password]);
 
   const hint = useMemo(() => {
-    if (!trimmedEmail && !password) return 'Enter a valid email and password.';
+    if (!trimmedUsername) return 'Enter a username.';
     if (!emailRegex.test(trimmedEmail)) return 'Please enter a valid email address.';
     if (!password.length) return 'Password is required.';
     return 'Ready to create account ✅';
-  }, [trimmedEmail, password]);
+  }, [trimmedUsername, trimmedEmail, password]);
 
   function handleOverlayClick() {
     onClose?.();
@@ -48,8 +51,7 @@ export function CreateAccountModal({ isOpen, onClose, onSubmit, error = '' }) {
   function handleSubmit(e) {
     e.preventDefault();
     if (!isValid) return;
-    onSubmit?.({ email: trimmedEmail, password });
-    onClose?.();
+    onSubmit?.({ username: trimmedUsername, email: trimmedEmail, password });
   }
 
   if (!isOpen) return null;
@@ -71,7 +73,7 @@ export function CreateAccountModal({ isOpen, onClose, onSubmit, error = '' }) {
         </div>
 
         <p className="sl-modal-subtitle">
-          Enter your email and a password. You can then use them to log in.
+          Enter a username, email, and password. You can then use them to log in.
         </p>
 
         {error && (
@@ -82,6 +84,18 @@ export function CreateAccountModal({ isOpen, onClose, onSubmit, error = '' }) {
 
         <form onSubmit={handleSubmit} className="sl-modal-form">
           <label className="sl-modal-label">
+            Username
+            <input
+              className="sl-modal-input"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="jane"
+              autoFocus
+            />
+          </label>
+
+          <label className="sl-modal-label">
             Email
             <input
               className="sl-modal-input"
@@ -89,7 +103,6 @@ export function CreateAccountModal({ isOpen, onClose, onSubmit, error = '' }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              autoFocus
             />
           </label>
 

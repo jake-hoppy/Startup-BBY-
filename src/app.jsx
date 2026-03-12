@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './app.css';
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { getCurrentUser } from './auth';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 import { Home } from './home/home';
 import { Login } from './login/login';
@@ -11,26 +11,32 @@ import { Feed } from './feed/feed';
 import { ToDo } from './ToDo/toDo';
 
 function ProtectedRoute({ children }) {
-  const user = getCurrentUser();
+  const { user } = useAuth();
   return user ? children : <Navigate to="/login" replace />;
 }
 
-export default function App() {
-  const currentUser = getCurrentUser();
+function AppRoutes() {
+  const { user } = useAuth();
+  return (
+    <Routes>
+      <Route path="/" element={user ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+      <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
+      <Route path="/todo" element={<ProtectedRoute><ToDo /></ProtectedRoute>} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
 
+export default function App() {
   return (
     <Router>
-      <div className="body bg-dark text-light d-flex flex-column min-vh-100">
-        <main className="flex-fill">
-          <Routes>
-            <Route path="/" element={currentUser ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-            <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
-            <Route path="/todo" element={<ProtectedRoute><ToDo /></ProtectedRoute>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
+      <AuthProvider>
+        <div className="body bg-dark text-light d-flex flex-column min-vh-100">
+          <main className="flex-fill">
+            <AppRoutes />
+          </main>
 
         <footer className="site-footer text-center mt-auto">
           <p><strong>Sociallearning</strong></p>
@@ -46,7 +52,8 @@ export default function App() {
             </a>
           </p>
         </footer>
-      </div>
+        </div>
+      </AuthProvider>
     </Router>
   );
 }

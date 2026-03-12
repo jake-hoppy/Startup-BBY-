@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { setCurrentUser, getCurrentUser, getAssignments } from '../auth';
+import { useAuth } from '../contexts/AuthContext';
+import { getAssignments } from '../auth';
 import './home.css';
 
 function formatShortDay(ymd) {
@@ -19,10 +20,10 @@ function getEndOfWeekStr(todayStr) {
 
 export function Home() {
   const navigate = useNavigate();
-  const currentUser = getCurrentUser();
+  const { user, logout } = useAuth();
   const assignments = useMemo(
-    () => (currentUser ? getAssignments(currentUser) : []),
-    [currentUser]
+    () => (user?.email ? getAssignments(user.email) : []),
+    [user?.email]
   );
 
   const { overdue, dueSoonCount, nextDue, dueThisWeekCount } = useMemo(() => {
@@ -49,12 +50,12 @@ export function Home() {
     };
   }, [assignments]);
 
-  function handleLogout() {
-    setCurrentUser(null);
+  async function handleLogout() {
+    await logout();
     navigate('/login');
   }
 
-  const displayName = currentUser ? currentUser.split('@')[0] : 'there';
+  const displayName = user?.username || (user?.email ? user.email.split('@')[0] : '') || 'there';
 
   return (
     <>

@@ -1,14 +1,16 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AddClassModal } from './AddClassModal';
 import { MakeClassModal } from './MakeClassModal';
 import { AddAssignmentModal } from './AddAssignmentModal';
-import { getCurrentUser, getClasses, saveClasses, getAssignments, saveAssignments, setCurrentUser } from '../auth';
+import { useAuth } from '../contexts/AuthContext';
+import { getClasses, saveClasses, getAssignments, saveAssignments } from '../auth';
 import './toDo.css';
 
 export function ToDo() {
   const navigate = useNavigate();
-  const currentUser = getCurrentUser();
+  const { user, logout } = useAuth();
+  const currentUser = user?.email;
 
   // --- Calendar state + helpers ---
   const MONTH_NAMES = useMemo(
@@ -67,6 +69,51 @@ export function ToDo() {
   // Assignments — load from local storage per user, save on change
   const [assignments, setAssignments] = useState(() => (currentUser ? getAssignments(currentUser) : []));
 
+  // Tasks from backend API
+  const [apiTasks, setApiTasks] = useState([]);
+  const [taskTitle, setTaskTitle] = useState('');
+  const [tasksLoading, setTasksLoading] = useState(true);
+
+  const fetchTasks = useCallback(async () => {
+    setTasksLoading(true);
+    try {
+      const res = await fetch('/api/tasks', { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        setApiTasks(Array.isArray(data) ? data : []);
+      }
+    } catch {
+      setApiTasks([]);
+    } finally {
+      setTasksLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (currentUser) fetchTasks();
+  }, [currentUser, fetchTasks]);
+
+  async function handleAddTask(e) {
+    e.preventDefault();
+    const title = taskTitle.trim();
+    if (!title) return;
+    try {
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title }),
+      });
+      if (res.ok) {
+        const task = await res.json();
+        setApiTasks((prev) => [task, ...prev]);
+        setTaskTitle('');
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   useEffect(() => {
     if (currentUser) saveClasses(currentUser, classes);
   }, [currentUser, classes]);
@@ -75,8 +122,8 @@ export function ToDo() {
     if (currentUser) saveAssignments(currentUser, assignments);
   }, [currentUser, assignments]);
 
-  function handleLogout() {
-    setCurrentUser(null);
+  async function handleLogout() {
+    await logout();
     navigate('/login');
   }
 
@@ -292,6 +339,35 @@ export function ToDo() {
           </section>
 
           <aside className="todo-sidebar">
+            <section className="sidebar-card">
+              <h2>My Tasks</h2>
+              <p>Tasks from backend</p>
+              <form onSubmit={handleAddTask} className="todo-add-task-form">
+                <input
+                  type="text"
+                  value={taskTitle}
+                  onChange={(e) => setTaskTitle(e.target.value)}
+                  placeholder="New task..."
+                  className="todo-task-input"
+                />
+                <button type="submit" className="add-class-button">Add Task</button>
+              </form>
+              {tasksLoading ? (
+                <p className="todo-tasks-loading">Loading…</p>
+              ) : (
+                <ul className="upcoming-list">
+                  {apiTasks.map((t) => (
+                    <li key={t.id}>
+                      <span className={t.completed ? 'todo-task-done' : ''}>{t.title}</span>
+                    </li>
+                  ))}
+                  {apiTasks.length === 0 && (
+                    <li style={{ opacity: 0.7 }}>No tasks yet.</li>
+                  )}
+                </ul>
+              )}
+            </section>
+
             <section className="sidebar-card">
               <h2>Add Class</h2>
               <p>Add a class from your Learning Suite link</p>
