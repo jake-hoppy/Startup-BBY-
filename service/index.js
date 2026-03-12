@@ -21,18 +21,18 @@ app.use('/api', apiRouter);
 // ---- Auth ----
 
 apiRouter.post('/auth/create', async (req, res) => {
-  const { email, password } = req.body || {};
-  if (!email || !password) {
-    res.status(400).send({ msg: 'Email and password required' });
+  const { username, email, password } = req.body || {};
+  if (!username || !email || !password) {
+    res.status(400).send({ msg: 'Username, email, and password required' });
     return;
   }
   if (findUserByEmail(email)) {
     res.status(409).send({ msg: 'Existing user' });
     return;
   }
-  const user = await createUser(email.trim(), password);
+  const user = await createUser(username.trim(), email.trim(), password);
   setAuthCookie(res, user.token);
-  res.send({ email: user.email });
+  res.send({ username: user.username, email: user.email });
 });
 
 apiRouter.post('/auth/login', async (req, res) => {
@@ -44,7 +44,7 @@ apiRouter.post('/auth/login', async (req, res) => {
   }
   user.token = uuid.v4();
   setAuthCookie(res, user.token);
-  res.send({ email: user.email });
+  res.send({ username: user.username, email: user.email });
 });
 
 apiRouter.delete('/auth/logout', (req, res) => {
@@ -60,7 +60,7 @@ apiRouter.get('/user/me', (req, res) => {
     res.status(401).send({ msg: 'Unauthorized' });
     return;
   }
-  res.send({ email: user.email });
+  res.send({ username: user.username, email: user.email });
 });
 
 // ---- Auth middleware ----
@@ -117,8 +117,9 @@ apiRouter.delete('/tasks/:id', verifyAuth, (req, res) => {
 
 // ---- Helpers ----
 
-async function createUser(email, password) {
+async function createUser(username, email, password) {
   const user = {
+    username,
     email,
     password: await bcrypt.hash(password, 10),
     token: uuid.v4(),
