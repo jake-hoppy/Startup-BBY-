@@ -254,7 +254,7 @@ export function Feed() {
 
           <aside className="feed-sidebar">
             <section className="sidebar-card api-placeholder">
-              <h3>Productivity Quote</h3>
+              <h3>QUOTE BREAK!!</h3>
               <div className="study-tip-content">
                 {studyTip.loading && <p>Loading…</p>}
                 {studyTip.error && <p className="study-tip-error">{studyTip.error}</p>}
