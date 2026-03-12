@@ -31,7 +31,7 @@ apiRouter.post('/auth/create', async (req, res) => {
     return;
   }
   const user = await createUser(username.trim(), email.trim(), password);
-  setAuthCookie(res, user.token);
+  setAuthCookie(res, user.token); // set auth cookie with the token
   res.send({ username: user.username, email: user.email });
 });
 
@@ -122,7 +122,7 @@ async function createUser(username, email, password) {
     username,
     email,
     password: await bcrypt.hash(password, 10),
-    token: uuid.v4(),
+    token: uuid.v4(), // create an auth token for this user
   };
   users.push(user); // store the user in memory
   return user;
@@ -139,6 +139,7 @@ function findUserByToken(token) {
   return users.find((u) => u.token === token);
 }
 
+// Set the auth token in an httpOnly cookie (secure, 1 year)
 function setAuthCookie(res, authToken) {
   res.cookie(authCookieName, authToken, {
     maxAge: 1000 * 60 * 60 * 24 * 365,
