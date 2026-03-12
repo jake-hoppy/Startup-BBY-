@@ -19,9 +19,9 @@ printf "\n----> Deploying React bundle $service to $hostname with $key\n"
 printf "\n----> Build the distribution package\n"
 rm -rf build
 mkdir build
-npm install
-npm run build
-cp -rf dist build/public
+npm install  # ensure Vite is available for frontend bundle
+npm run build  # Vite builds frontend to dist/
+cp -rf dist build/public  # frontend goes to public/ so Express can serve it
 cp service/*.js build
 cp service/*.json build
 

@@ -16,6 +16,8 @@ const posts = [];         // { id, owner, text, category, createdAt }
 
 app.use(express.json());
 app.use(cookieParser());
+
+// In production, frontend is served by Express from public/ (deploy puts Vite build there)
 app.use(express.static('public'));
 
 const apiRouter = express.Router();

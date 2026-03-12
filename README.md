@@ -111,12 +111,12 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Node.js/Express HTTP service** - I did not complete this part of the deliverable.
-- [ ] **Static middleware for frontend** - I did not complete this part of the deliverable.
-- [ ] **Calls to third party endpoints** - I did not complete this part of the deliverable.
-- [ ] **Backend service endpoints** - I did not complete this part of the deliverable.
-- [ ] **Frontend calls service endpoints** - I did not complete this part of the deliverable.
-- [ ] **Supports registration, login, logout, and restricted endpoint** - I did not complete this part of the deliverable.
+- [x] **Node.js/Express HTTP service** - Express app in service/index.js, with express.json(), cookie-parser(), and static + API routes. Deploy runs it via npm start in the service directory.
+- [x] **Static middleware for frontend** - app.use(express.static('public')) in the service. Deploy script runs npm run build, then copies dist/ to build/public/, so in production Express serves the Vite-built frontend from public/. SPA fallback sends index.html for non-API routes.
+- [x] **Calls to third party endpoints** - Feed page calls `https://api.adviceslip.com/advice` with fetch() and displays the result in the "QUOTE BREAK!!" sidebar.
+- [x] **Backend service endpoints** - Auth: 'POST /api/auth/create, POST /api/auth/login, DELETE /api/auth/logout, GET /api/user/me. App data: GET/POST /api/tasks, GET/POST /api/classes, GET/POST /api/assignments, DELETE /api/assignments/:id, GET/POST /api/posts. All app endpoints use verifyAuth (cookie-based).
+- [x] **Frontend calls service endpoints** - src/api.js sends all requests with credentials: 'include'. AuthContext calls auth endpoints; Home/Feed/ToDo fetch classes, assignments, posts, and tasks from the API. No auth or user data stored in the frontend.
+- [x] **Supports registration, login, logout, and restricted endpoint** - Registration: POST /api/auth/create (username, email, password; bcrypt hash, token, cookie). Login: POST /api/auth/login (email, password; bcrypt compare, set cookie). Logout: DELETE /api/auth/logout (clear cookie and token). Restricted: verifyAuth middleware reads cookie, verifies token; tasks, classes, assignments, and posts endpoints require auth and return 401 otherwise.
 
 ## 🚀 DB deliverable
 
