@@ -64,8 +64,9 @@ apiRouter.get('/user/me', (req, res) => {
   res.send({ username: user.username, email: user.email });
 });
 
-// ---- Auth middleware ----
+// ---- Auth middleware (restricted endpoints) ----
 
+// Read auth cookie, verify user/token exists, reject if not logged in
 function verifyAuth(req, res, next) {
   const user = findUserByToken(req.cookies[authCookieName]);
   if (!user) {

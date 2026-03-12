@@ -11,10 +11,30 @@ export function Feed() {
   const [postCategory, setPostCategory] = useState('');
   const [posts, setPosts] = useState(() => (currentUser ? getPosts(currentUser) : []));
   const [filter, setFilter] = useState('all');
+  const [studyTip, setStudyTip] = useState({ text: null, author: null, loading: true, error: null });
 
   useEffect(() => {
     if (currentUser) setPosts(getPosts(currentUser));
   }, [currentUser]);
+
+  // Third-party API: fetch a short advice-style quote for "Study Tip of the Day"
+  useEffect(() => {
+    setStudyTip((s) => ({ ...s, loading: true, error: null }));
+    fetch('https://api.adviceslip.com/advice')
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`API error: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        const text = data?.slip?.advice || 'Take a short break and review your notes.';
+        setStudyTip({ text, author: 'Advice Slip', loading: false, error: null });
+      })
+      .catch((err) => {
+        setStudyTip((s) => ({ ...s, loading: false, error: err.message || 'Unable to load quote.' }));
+      });
+  }, []);
 
   const filteredPosts = useMemo(() => {
     if (filter === 'all') return posts;
@@ -235,31 +255,17 @@ export function Feed() {
           <aside className="feed-sidebar">
             <section className="sidebar-card api-placeholder">
               <h3>Study Tip of the Day</h3>
-
-              {/* 
-                This section is intended to be populated by a future 3rd-party API.
-                Example APIs could include:
-                - Study tips
-                - Productivity quotes
-                - Learning resources
-              */}
-
-              <div id="study-tip">Loading study tip...</div>
-
-              {/* 
-                Example future JavaScript (not active yet):
-
-                <script>
-                  // fetch('https://api.example.com/study-tip')
-                  //   .then(response => response.json())
-                  //   .then(data => {
-                  //     document.getElementById('study-tip').textContent = data.tip;
-                  //   })
-                  //   .catch(error => {
-                  //     document.getElementById('study-tip').textContent = 'Unable to load study tip.';
-                  //   });
-                </script>
-              */}
+              <p className="sidebar-subtitle">Productivity quote from Quotable API</p>
+              <div className="study-tip-content">
+                {studyTip.loading && <p>Loading…</p>}
+                {studyTip.error && <p className="study-tip-error">{studyTip.error}</p>}
+                {!studyTip.loading && !studyTip.error && studyTip.text && (
+                  <>
+                    <p className="study-tip-quote">"{studyTip.text}"</p>
+                    {studyTip.author && <p className="study-tip-author">— {studyTip.author}</p>}
+                  </>
+                )}
+              </div>
             </section>
 
             <section className="sidebar-card">

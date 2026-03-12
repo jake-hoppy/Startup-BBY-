@@ -111,9 +111,18 @@
   gap: 12px;
 }
 
-.api-placeholder #study-tip {
+.api-placeholder .study-tip-content {
   color: var(--muted);
   padding-top: 6px;
+}
+
+.api-placeholder .study-tip-author {
+  font-size: 0.9em;
+  margin-top: 4px;
+}
+
+.api-placeholder .study-tip-error {
+  color: var(--danger, #dc3545);
 }
 
 #live-status {
