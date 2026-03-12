@@ -254,8 +254,7 @@ export function Feed() {
 
           <aside className="feed-sidebar">
             <section className="sidebar-card api-placeholder">
-              <h3>Study Tip of the Day</h3>
-              <p className="sidebar-subtitle">Advice from api.adviceslip.com</p>
+              <h3>Productivity Quote</h3>
               <div className="study-tip-content">
                 {studyTip.loading && <p>Loading…</p>}
                 {studyTip.error && <p className="study-tip-error">{studyTip.error}</p>}
