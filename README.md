@@ -122,10 +122,8 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [x] **Stores data in MongoDB** - The Express service connects to MongoDB Atlas using the official Node driver (`mongodb` in `service/package.json`). Connection is configured via `dbConfig.json` in the project root (gitignored; use `dbConfig.example.json` as a template) or via the `MONGODB_URI` environment variable on the server. Database name defaults to `startup-bby` (from config). Collections: `users` (accounts and session tokens), `classes` (per-user class names), `assignments`, `posts`, and `tasks`. All app data that was previously in-memory is read and written through these collections.
-- [x] **Stores credentials in MongoDB** - User documents in the `users` collection store `email` (unique, lowercase), `username`, `password` (bcrypt hash only—never plain text), and `token` (current session token, cleared on logout). Registration inserts a new user document; login updates `token`; logout sets `token` to null.
-
-**Local setup:** From the repo root, copy `dbConfig.example.json` to `dbConfig.json` and fill in Atlas hostname, database name, username, and password. `dbConfig.json` is listed in `.gitignore`—do not commit it. **Production:** Set `MONGODB_URI` (full Atlas connection string) on the server (e.g. pm2 env) so credentials are not copied with the deploy bundle.
+- [x] **Stores data in MongoDB** - Stores data in MongoDB – The app uses MongoDB Atlas (via the Node driver) to store all data. Connection is set through dbConfig.json or MONGODB_URI. Data is stored in collections like users, classes, assignments, posts, and tasks.
+- [x] **Stores credentials in MongoDB** - User data is stored in the users collection, including email, username, hashed password, and a session token. Register creates a user, login sets the token, and logout clears it.
 
 ## 🚀 WebSocket deliverable
 
