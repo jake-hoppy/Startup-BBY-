@@ -2,22 +2,15 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const uuid = require('uuid');
+const { connectMongo, getDb } = require('./db');
 
 const app = express();
 const port = process.argv.length > 2 ? process.argv[2] : 4000;
 const authCookieName = 'token';
 
-// Temporary in-memory storage (no database). Data is lost when the service restarts.
-const users = [];
-const tasks = [];
-const classes = [];       // { owner, name }
-const assignments = [];   // { id, owner, name, dueDate, className }
-const posts = [];         // { id, owner, text, category, createdAt }
-
 app.use(express.json());
 app.use(cookieParser());
 
-// In production, frontend is served by Express from public/ (deploy puts Vite build there)
 app.use(express.static('public'));
 
 const apiRouter = express.Router();
@@ -26,242 +19,384 @@ app.use('/api', apiRouter);
 // ---- Auth ----
 
 apiRouter.post('/auth/create', async (req, res) => {
-  const { username, email, password } = req.body || {};
-  if (!username || !email || !password) {
-    res.status(400).send({ msg: 'Username, email, and password required' });
-    return;
+  try {
+    const { username, email, password } = req.body || {};
+    if (!username || !email || !password) {
+      res.status(400).send({ msg: 'Username, email, and password required' });
+      return;
+    }
+    const emailNorm = String(email).trim().toLowerCase();
+    if (await findUserByEmail(emailNorm)) {
+      res.status(409).send({ msg: 'Existing user' });
+      return;
+    }
+    const user = await createUser(username.trim(), emailNorm, password);
+    setAuthCookie(req, res, user.token);
+    res.send({ username: user.username, email: user.email });
+  } catch (e) {
+    if (e.code === 11000) {
+      res.status(409).send({ msg: 'Existing user' });
+      return;
+    }
+    console.error(e);
+    res.status(500).send({ msg: 'Server error' });
   }
-  if (findUserByEmail(email)) {
-    res.status(409).send({ msg: 'Existing user' });
-    return;
-  }
-  const user = await createUser(username.trim(), email.trim(), password);
-  setAuthCookie(res, user.token); // set auth cookie with the token
-  res.send({ username: user.username, email: user.email });
 });
 
 apiRouter.post('/auth/login', async (req, res) => {
-  const { email, password } = req.body || {};
-  const user = findUserByEmail(email); // find the user by email
-  // compare password with bcrypt (plain text vs stored hash)
-  if (!user || !(await bcrypt.compare(password || '', user.password))) {
-    res.status(401).send({ msg: 'Unauthorized' });
-    return;
+  try {
+    const { email, password } = req.body || {};
+    const user = await findUserByEmail(email);
+    if (!user || !(await bcrypt.compare(password || '', user.password))) {
+      res.status(401).send({ msg: 'Unauthorized' });
+      return;
+    }
+    const newToken = uuid.v4();
+    await getDb()
+      .collection('users')
+      .updateOne({ email: user.email }, { $set: { token: newToken } });
+    user.token = newToken;
+    setAuthCookie(req, res, newToken);
+    res.send({ username: user.username, email: user.email });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ msg: 'Server error' });
   }
-  user.token = uuid.v4(); // create a token if correct
-  setAuthCookie(res, user.token);
-  res.send({ username: user.username, email: user.email });
 });
 
-apiRouter.delete('/auth/logout', (req, res) => {
-  const user = findUserByToken(req.cookies[authCookieName]);
-  if (user) delete user.token; // remove the stored token
-  res.clearCookie(authCookieName); // clear the cookie
-  res.status(204).end();
+apiRouter.delete('/auth/logout', async (req, res) => {
+  try {
+    const user = await findUserByToken(req.cookies[authCookieName]);
+    if (user) {
+      await getDb().collection('users').updateOne({ email: user.email }, { $set: { token: null } });
+    }
+    res.clearCookie(authCookieName);
+    res.status(204).end();
+  } catch (e) {
+    console.error(e);
+    res.clearCookie(authCookieName);
+    res.status(204).end();
+  }
 });
 
-apiRouter.get('/user/me', (req, res) => {
-  const user = findUserByToken(req.cookies[authCookieName]);
-  if (!user) {
-    res.status(401).send({ msg: 'Unauthorized' });
-    return;
+apiRouter.get('/user/me', async (req, res) => {
+  try {
+    const user = await findUserByToken(req.cookies[authCookieName]);
+    if (!user) {
+      res.status(401).send({ msg: 'Unauthorized' });
+      return;
+    }
+    res.send({ username: user.username, email: user.email });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ msg: 'Server error' });
   }
-  res.send({ username: user.username, email: user.email });
 });
 
-// ---- Auth middleware (restricted endpoints) ----
-
-// Read auth cookie, verify user/token exists, reject if not logged in
-function verifyAuth(req, res, next) {
-  const user = findUserByToken(req.cookies[authCookieName]);
-  if (!user) {
-    res.status(401).send({ msg: 'Unauthorized' });
-    return;
+async function verifyAuth(req, res, next) {
+  try {
+    const user = await findUserByToken(req.cookies[authCookieName]);
+    if (!user) {
+      res.status(401).send({ msg: 'Unauthorized' });
+      return;
+    }
+    req.user = user;
+    next();
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ msg: 'Server error' });
   }
-  req.user = user;
-  next();
 }
 
-// ---- Tasks (app endpoints) ----
+// ---- Tasks ----
 
-apiRouter.get('/tasks', verifyAuth, (req, res) => {
-  const list = tasks.filter((t) => t.owner === req.user.email);
-  res.send(list);
-});
-
-apiRouter.post('/tasks', verifyAuth, (req, res) => {
-  const { title } = req.body || {};
-  const task = {
-    id: uuid.v4(),
-    owner: req.user.email,
-    title: title || 'Untitled',
-    completed: false,
-  };
-  tasks.push(task);
-  res.status(201).send(task);
-});
-
-apiRouter.put('/tasks/:id', verifyAuth, (req, res) => {
-  const task = tasks.find((t) => t.id === req.params.id && t.owner === req.user.email);
-  if (!task) {
-    res.status(404).send({ msg: 'Not found' });
-    return;
+apiRouter.get('/tasks', verifyAuth, async (req, res) => {
+  try {
+    const list = await getDb()
+      .collection('tasks')
+      .find({ ownerEmail: req.user.email })
+      .project({ _id: 0 })
+      .toArray();
+    const out = list.map((t) => ({
+      id: t.id,
+      owner: t.ownerEmail,
+      title: t.title,
+      completed: t.completed,
+    }));
+    res.send(out);
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ msg: 'Server error' });
   }
-  if (req.body.title !== undefined) task.title = req.body.title;
-  if (req.body.completed !== undefined) task.completed = Boolean(req.body.completed);
-  res.send(task);
 });
 
-apiRouter.delete('/tasks/:id', verifyAuth, (req, res) => {
-  const i = tasks.findIndex((t) => t.id === req.params.id && t.owner === req.user.email);
-  if (i === -1) {
-    res.status(404).send({ msg: 'Not found' });
-    return;
+apiRouter.post('/tasks', verifyAuth, async (req, res) => {
+  try {
+    const { title } = req.body || {};
+    const task = {
+      id: uuid.v4(),
+      ownerEmail: req.user.email,
+      title: title || 'Untitled',
+      completed: false,
+    };
+    await getDb().collection('tasks').insertOne(task);
+    res.status(201).send({
+      id: task.id,
+      owner: task.ownerEmail,
+      title: task.title,
+      completed: task.completed,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ msg: 'Server error' });
   }
-  tasks.splice(i, 1);
-  res.status(204).end();
+});
+
+apiRouter.put('/tasks/:id', verifyAuth, async (req, res) => {
+  try {
+    const filter = { id: req.params.id, ownerEmail: req.user.email };
+    const updates = {};
+    if (req.body.title !== undefined) updates.title = req.body.title;
+    if (req.body.completed !== undefined) updates.completed = Boolean(req.body.completed);
+    if (Object.keys(updates).length > 0) {
+      await getDb().collection('tasks').updateOne(filter, { $set: updates });
+    }
+    const doc = await getDb().collection('tasks').findOne(filter);
+    if (!doc) {
+      res.status(404).send({ msg: 'Not found' });
+      return;
+    }
+    res.send({
+      id: doc.id,
+      owner: doc.ownerEmail,
+      title: doc.title,
+      completed: doc.completed,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ msg: 'Server error' });
+  }
+});
+
+apiRouter.delete('/tasks/:id', verifyAuth, async (req, res) => {
+  try {
+    const r = await getDb().collection('tasks').deleteOne({
+      id: req.params.id,
+      ownerEmail: req.user.email,
+    });
+    if (r.deletedCount === 0) {
+      res.status(404).send({ msg: 'Not found' });
+      return;
+    }
+    res.status(204).end();
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ msg: 'Server error' });
+  }
 });
 
 // ---- Classes ----
 
-apiRouter.get('/classes', verifyAuth, (req, res) => {
-  const list = classes
-    .filter((c) => c.owner === req.user.email)
-    .map((c) => c.name);
-  res.send(list);
+apiRouter.get('/classes', verifyAuth, async (req, res) => {
+  try {
+    const docs = await getDb()
+      .collection('classes')
+      .find({ ownerEmail: req.user.email })
+      .project({ name: 1, _id: 0 })
+      .toArray();
+    res.send(docs.map((c) => c.name));
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ msg: 'Server error' });
+  }
 });
 
-apiRouter.post('/classes', verifyAuth, (req, res) => {
-  const name = (req.body?.name || req.body?.className || '').trim();
-  if (!name) {
-    res.status(400).send({ msg: 'Class name required' });
-    return;
+apiRouter.post('/classes', verifyAuth, async (req, res) => {
+  try {
+    const name = (req.body?.name || req.body?.className || '').trim();
+    if (!name) {
+      res.status(400).send({ msg: 'Class name required' });
+      return;
+    }
+    const ownerEmail = req.user.email;
+    const col = getDb().collection('classes');
+    await col.updateOne(
+      { ownerEmail, name },
+      { $setOnInsert: { ownerEmail, name } },
+      { upsert: true }
+    );
+    const docs = await col.find({ ownerEmail }).project({ name: 1, _id: 0 }).toArray();
+    res.status(201).send(docs.map((c) => c.name));
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ msg: 'Server error' });
   }
-  const owner = req.user.email;
-  const exists = classes.some((c) => c.owner === owner && c.name === name);
-  if (exists) {
-    res.send(classes.filter((c) => c.owner === owner).map((c) => c.name));
-    return;
-  }
-  classes.push({ owner, name });
-  res.status(201).send(classes.filter((c) => c.owner === owner).map((c) => c.name));
 });
 
 // ---- Assignments ----
 
-apiRouter.get('/assignments', verifyAuth, (req, res) => {
-  const list = assignments
-    .filter((a) => a.owner === req.user.email)
-    .map((a) => ({ id: a.id, name: a.name, dueDate: a.dueDate, className: a.className }));
-  res.send(list);
+apiRouter.get('/assignments', verifyAuth, async (req, res) => {
+  try {
+    const list = await getDb()
+      .collection('assignments')
+      .find({ ownerEmail: req.user.email })
+      .project({ _id: 0, ownerEmail: 0 })
+      .toArray();
+    res.send(
+      list.map((a) => ({
+        id: a.id,
+        name: a.name,
+        dueDate: a.dueDate,
+        className: a.className,
+      }))
+    );
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ msg: 'Server error' });
+  }
 });
 
-apiRouter.post('/assignments', verifyAuth, (req, res) => {
-  const { name, dueDate, className } = req.body || {};
-  if (!name || !dueDate) {
-    res.status(400).send({ msg: 'Name and dueDate required' });
-    return;
+apiRouter.post('/assignments', verifyAuth, async (req, res) => {
+  try {
+    const { name, dueDate, className } = req.body || {};
+    if (!name || !dueDate) {
+      res.status(400).send({ msg: 'Name and dueDate required' });
+      return;
+    }
+    const assignment = {
+      id: uuid.v4(),
+      ownerEmail: req.user.email,
+      name: String(name).trim(),
+      dueDate: String(dueDate).trim(),
+      className: String(className || '').trim(),
+    };
+    await getDb().collection('assignments').insertOne(assignment);
+    res.status(201).send({
+      id: assignment.id,
+      name: assignment.name,
+      dueDate: assignment.dueDate,
+      className: assignment.className,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ msg: 'Server error' });
   }
-  const assignment = {
-    id: uuid.v4(),
-    owner: req.user.email,
-    name: String(name).trim(),
-    dueDate: String(dueDate).trim(),
-    className: String(className || '').trim(),
-  };
-  assignments.push(assignment);
-  res.status(201).send(assignment);
 });
 
-apiRouter.delete('/assignments/:id', verifyAuth, (req, res) => {
-  const i = assignments.findIndex(
-    (a) => a.id === req.params.id && a.owner === req.user.email
-  );
-  if (i === -1) {
-    res.status(404).send({ msg: 'Not found' });
-    return;
+apiRouter.delete('/assignments/:id', verifyAuth, async (req, res) => {
+  try {
+    const r = await getDb().collection('assignments').deleteOne({
+      id: req.params.id,
+      ownerEmail: req.user.email,
+    });
+    if (r.deletedCount === 0) {
+      res.status(404).send({ msg: 'Not found' });
+      return;
+    }
+    res.status(204).end();
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ msg: 'Server error' });
   }
-  assignments.splice(i, 1);
-  res.status(204).end();
 });
 
 // ---- Posts ----
 
-apiRouter.get('/posts', verifyAuth, (req, res) => {
-  const list = posts
-    .filter((p) => p.owner === req.user.email)
-    .map((p) => ({
-      id: p.id,
-      author: p.owner,
-      text: p.text,
-      category: p.category,
-      createdAt: p.createdAt,
-    }));
-  res.send(list);
+apiRouter.get('/posts', verifyAuth, async (req, res) => {
+  try {
+    const list = await getDb()
+      .collection('posts')
+      .find({ ownerEmail: req.user.email })
+      .sort({ createdAt: -1 })
+      .project({ _id: 0 })
+      .toArray();
+    res.send(
+      list.map((p) => ({
+        id: p.id,
+        author: p.ownerEmail,
+        text: p.text,
+        category: p.category,
+        createdAt: p.createdAt,
+      }))
+    );
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ msg: 'Server error' });
+  }
 });
 
-apiRouter.post('/posts', verifyAuth, (req, res) => {
-  const text = (req.body?.text || '').trim();
-  if (!text) {
-    res.status(400).send({ msg: 'Text required' });
-    return;
+apiRouter.post('/posts', verifyAuth, async (req, res) => {
+  try {
+    const text = (req.body?.text || '').trim();
+    if (!text) {
+      res.status(400).send({ msg: 'Text required' });
+      return;
+    }
+    const post = {
+      id: uuid.v4(),
+      ownerEmail: req.user.email,
+      text,
+      category: (req.body?.category || 'post').trim() || 'post',
+      createdAt: new Date().toISOString(),
+    };
+    await getDb().collection('posts').insertOne(post);
+    res.status(201).send({
+      id: post.id,
+      author: post.ownerEmail,
+      text: post.text,
+      category: post.category,
+      createdAt: post.createdAt,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ msg: 'Server error' });
   }
-  const post = {
-    id: uuid.v4(),
-    owner: req.user.email,
-    text,
-    category: (req.body?.category || 'post').trim() || 'post',
-    createdAt: new Date().toISOString(),
-  };
-  posts.push(post);
-  res.status(201).send({
-    id: post.id,
-    author: post.owner,
-    text: post.text,
-    category: post.category,
-    createdAt: post.createdAt,
-  });
 });
 
 // ---- Helpers ----
 
 async function createUser(username, email, password) {
-  const user = {
-    username,
-    email,
-    password: await bcrypt.hash(password, 10),
-    token: uuid.v4(), // create an auth token for this user
-  };
-  users.push(user); // store the user in memory
-  return user;
+  const hash = await bcrypt.hash(password, 10);
+  const token = uuid.v4();
+  const doc = { username, email, password: hash, token };
+  await getDb().collection('users').insertOne(doc);
+  return { username, email, password: hash, token };
 }
 
-function findUserByEmail(email) {
+async function findUserByEmail(email) {
   if (!email) return null;
   const lower = String(email).trim().toLowerCase();
-  return users.find((u) => u.email.toLowerCase() === lower);
+  return await getDb().collection('users').findOne({ email: lower });
 }
 
-function findUserByToken(token) {
+async function findUserByToken(token) {
   if (!token) return null;
-  return users.find((u) => u.token === token);
+  return await getDb().collection('users').findOne({ token });
 }
 
-// Set the auth token in an httpOnly cookie (secure, 1 year)
-function setAuthCookie(res, authToken) {
+function setAuthCookie(req, res, authToken) {
+  const isLocalhost = req.hostname === 'localhost' || req.hostname === '127.0.0.1';
+  const secure = !isLocalhost && process.env.NODE_ENV === 'production';
   res.cookie(authCookieName, authToken, {
     maxAge: 1000 * 60 * 60 * 24 * 365,
-    secure: true,
+    secure,
     httpOnly: true,
     sameSite: 'strict',
   });
 }
 
-// SPA fallback: serve index.html for unknown routes
 app.use((_req, res) => {
   res.sendFile('index.html', { root: 'public' });
 });
 
-app.listen(port, () => {
-  console.log(`Listening on port ${port}`);
+async function start() {
+  await connectMongo();
+  app.listen(port, () => {
+    console.log(`Listening on port ${port}`);
+  });
+}
+
+start().catch((err) => {
+  console.error('Failed to start:', err);
+  process.exit(1);
 });
