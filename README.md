@@ -122,8 +122,10 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Stores data in MongoDB** - I did not complete this part of the deliverable.
-- [ ] **Stores credentials in MongoDB** - I did not complete this part of the deliverable.
+- [x] **Stores data in MongoDB** - The Express service connects to MongoDB Atlas using the official Node driver (`mongodb` in `service/package.json`). Connection is configured via `dbConfig.json` in the project root (gitignored; use `dbConfig.example.json` as a template) or via the `MONGODB_URI` environment variable on the server. Database name defaults to `startup-bby` (from config). Collections: `users` (accounts and session tokens), `classes` (per-user class names), `assignments`, `posts`, and `tasks`. All app data that was previously in-memory is read and written through these collections.
+- [x] **Stores credentials in MongoDB** - User documents in the `users` collection store `email` (unique, lowercase), `username`, `password` (bcrypt hash only—never plain text), and `token` (current session token, cleared on logout). Registration inserts a new user document; login updates `token`; logout sets `token` to null.
+
+**Local setup:** From the repo root, copy `dbConfig.example.json` to `dbConfig.json` and fill in Atlas hostname, database name, username, and password. `dbConfig.json` is listed in `.gitignore`—do not commit it. **Production:** Set `MONGODB_URI` (full Atlas connection string) on the server (e.g. pm2 env) so credentials are not copied with the deploy bundle.
 
 ## 🚀 WebSocket deliverable
 
