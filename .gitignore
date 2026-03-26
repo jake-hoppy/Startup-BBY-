@@ -1,3 +1,11 @@
 .vscode/
 .DS_Store
 node_modules/
+dbConfig.json
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

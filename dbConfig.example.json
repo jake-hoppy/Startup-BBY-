@@ -1,0 +1,6 @@
+{
+  "hostname": "your-cluster.xxxxx.mongodb.net",
+  "database": "startup-bby",
+  "username": "yourUser",
+  "password": "YOUR_DB_PASSWORD"
+}
