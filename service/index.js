@@ -394,6 +394,12 @@ app.use((_req, res) => {
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server, path: '/ws' });
 
+function getTokenFromCookieHeader(header) {
+  if (!header) return null;
+  const m = header.match(new RegExp(`(?:^|;\\s*)${authCookieName}=([^;]+)`));
+  return m ? decodeURIComponent(m[1].trim()) : null;
+}
+
 async function start() {
   await connectMongo();
   server.listen(port, () => {
