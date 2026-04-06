@@ -400,6 +400,16 @@ function getTokenFromCookieHeader(header) {
   return m ? decodeURIComponent(m[1].trim()) : null;
 }
 
+wss.on('connection', async (ws, req) => {
+  const token = getTokenFromCookieHeader(req.headers.cookie);
+  const chatUser = token ? await findUserByToken(token) : null;
+  if (!chatUser) {
+    ws.close(4401, 'Unauthorized');
+    return;
+  }
+  ws.user = { username: chatUser.username, email: chatUser.email };
+});
+
 async function start() {
   await connectMongo();
   server.listen(port, () => {
