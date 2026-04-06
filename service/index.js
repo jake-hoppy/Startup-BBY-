@@ -391,9 +391,12 @@ app.use((_req, res) => {
   res.sendFile('index.html', { root: 'public' });
 });
 
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server, path: '/ws' });
+
 async function start() {
   await connectMongo();
-  app.listen(port, () => {
+  server.listen(port, () => {
     console.log(`Listening on port ${port}`);
   });
 }
