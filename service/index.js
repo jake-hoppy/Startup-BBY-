@@ -407,6 +407,14 @@ function broadcastWs(data) {
   }
 }
 
+function wsAuthenticatedCount() {
+  let n = 0;
+  for (const c of wss.clients) {
+    if (c.readyState === WebSocket.OPEN && c.user) n += 1;
+  }
+  return n;
+}
+
 wss.on('connection', async (ws, req) => {
   const token = getTokenFromCookieHeader(req.headers.cookie);
   const chatUser = token ? await findUserByToken(token) : null;
