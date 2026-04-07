@@ -8,24 +8,13 @@ export function Feed() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
-  const [postText, setPostText] = useState('');
-  const [postCategory, setPostCategory] = useState('');
-  const [posts, setPosts] = useState([]);
   const [assignments, setAssignments] = useState([]);
-  const [filter, setFilter] = useState('all');
   const [studyTip, setStudyTip] = useState({ text: null, loading: true, error: null });
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [chatStatus, setChatStatus] = useState('offline');
   const [onlineCount, setOnlineCount] = useState(0);
   const chatWsRef = useRef(null);
-
-  useEffect(() => {
-    api('/api/posts')
-      .then((res) => (res.ok ? res.json() : []))
-      .then(setPosts)
-      .catch(() => setPosts([]));
-  }, [user?.email]);
 
   useEffect(() => {
     api('/api/assignments')
@@ -81,11 +70,6 @@ export function Feed() {
     };
   }, [user?.email]);
 
-  const filteredPosts = useMemo(() => {
-    if (filter === 'all') return posts;
-    return posts.filter((p) => p.category === filter);
-  }, [posts, filter]);
-
   const upcomingDue = useMemo(() => {
     return assignments
       .slice()
@@ -105,42 +89,6 @@ export function Feed() {
     if (!t || !ws || ws.readyState !== WebSocket.OPEN) return;
     ws.send(JSON.stringify({ type: 'chat', text: t }));
     setChatInput('');
-  }
-
-  async function handleCreatePost(e) {
-    e.preventDefault();
-    const trimmed = postText.trim();
-    if (!trimmed) return;
-    try {
-      const res = await api('/api/posts', {
-        method: 'POST',
-        body: JSON.stringify({ text: trimmed, category: postCategory || 'post' }),
-      });
-      if (res.ok) {
-        const created = await res.json();
-        setPosts((prev) => [created, ...prev]);
-        setPostText('');
-        setPostCategory('');
-      }
-    } catch {
-      // ignore
-    }
-  }
-
-  function authorDisplay(email) {
-    if (!email) return '?';
-    const part = email.split('@')[0];
-    return part.length > 2 ? part.slice(0, 2).toUpperCase() : part.toUpperCase();
-  }
-
-  function timeAgo(iso) {
-    const d = new Date(iso);
-    const sec = (Date.now() - d.getTime()) / 1000;
-    if (sec < 60) return 'just now';
-    if (sec < 3600) return `${Math.floor(sec / 60)}m ago`;
-    if (sec < 86400) return `${Math.floor(sec / 3600)}h ago`;
-    if (sec < 604800) return `${Math.floor(sec / 86400)}d ago`;
-    return d.toLocaleDateString();
   }
 
   return (
@@ -176,133 +124,56 @@ export function Feed() {
       <main>
         <div className="feed-layout">
           <div className="feed-main">
-            <section className="create-post-section">
-              <h2>Create Post</h2>
+            <header className="feed-main-header">
+              <h1>Feed</h1>
+              <p className="feed-page-lead">
+                Live study chat — share questions, wins, and resources. Messages show up instantly for
+                everyone on this page.
+              </p>
+            </header>
 
-              <form onSubmit={handleCreatePost}>
+            <section className="feed-main-live-chat" aria-label="Live chat feed">
+              <div className="feed-main-live-chat-header">
+                <h2>Live messages</h2>
+                <p className="feed-chat-meta">
+                  {onlineCount} online ·{' '}
+                  {chatStatus === 'live'
+                    ? 'Connected'
+                    : chatStatus === 'connecting'
+                      ? 'Connecting…'
+                      : 'Disconnected'}
+                </p>
+              </div>
+              <ul className="feed-chat-messages" aria-live="polite">
+                {chatMessages.length === 0 ? (
+                  <li className="feed-chat-empty">
+                    No messages yet. Open this feed in another window (or ask a classmate to join) to chat
+                    in real time.
+                  </li>
+                ) : (
+                  chatMessages.map((m, i) => (
+                    <li key={`${m.ts}-${i}`}>
+                      <strong>{m.from}:</strong> {m.text}
+                    </li>
+                  ))
+                )}
+              </ul>
+              <form className="feed-chat-form" onSubmit={sendLiveChat}>
                 <textarea
-                  placeholder="Share a study accomplishment, question, or resource…"
+                  placeholder="Share a study question, accomplishment, or resource…"
                   rows={4}
-                  value={postText}
-                  onChange={(e) => setPostText(e.target.value)}
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  maxLength={500}
+                  autoComplete="off"
                 />
-
-                <div className="post-controls">
-                  <select
-                    value={postCategory}
-                    onChange={(e) => setPostCategory(e.target.value)}
-                  >
-                    <option value="">Select category</option>
-                    <option value="question">Question</option>
-                    <option value="accomplishment">Accomplishments</option>
-                    <option value="resource">Resource</option>
-                  </select>
-
-                  <button type="submit" disabled={!postText.trim()}>
-                    Post
+                <div className="feed-chat-form-actions">
+                  <span className="feed-chat-char-hint">{chatInput.length}/500</span>
+                  <button type="submit" disabled={chatStatus !== 'live' || !chatInput.trim()}>
+                    Send to feed
                   </button>
                 </div>
               </form>
-            </section>
-
-            <h1>Feed</h1>
-
-            <section className="feed-filters">
-              <button
-                type="button"
-                onClick={() => setFilter('all')}
-                aria-pressed={filter === 'all'}
-              >
-                All
-              </button>
-              <button
-                type="button"
-                onClick={() => setFilter('question')}
-                aria-pressed={filter === 'question'}
-              >
-                Questions
-              </button>
-              <button
-                type="button"
-                onClick={() => setFilter('accomplishment')}
-                aria-pressed={filter === 'accomplishment'}
-              >
-                Accomplishments
-              </button>
-              <button
-                type="button"
-                onClick={() => setFilter('resource')}
-                aria-pressed={filter === 'resource'}
-              >
-                Resources
-              </button>
-            </section>
-
-            <section className="websocket-placeholder">
-              <h2>Live Updates</h2>
-
-              {/* 
-                WebSocket Placeholder (for grading):
-
-                This section represents intended real-time functionality.
-                In the final app, posts would be pushed live to connected clients
-                using WebSockets (or similar real-time technology).
-
-                Example use cases:
-                - New posts appear instantly without refresh
-                - Live reactions/comments
-                - Presence indicators (who is online)
-              */}
-
-              <div id="live-status">Waiting for live updates…</div>
-
-              {/* 
-                Example future JavaScript (not active yet):
-
-                <script>
-                  // const socket = new WebSocket("wss://example.com/feed");
-                  //
-                  // socket.onopen = () => {
-                  //   document.getElementById("live-status").textContent =
-                  //     "Connected to live feed";
-                  // };
-                  //
-                  // socket.onmessage = (event) => {
-                  //   // const newPost = JSON.parse(event.data);
-                  //   // renderNewPost(newPost);
-                  // };
-                  //
-                  // socket.onclose = () => {
-                  //   document.getElementById("live-status").textContent =
-                  //     "Disconnected from live feed";
-                  // };
-                </script>
-              */}
-            </section>
-
-            <section className="posts-section">
-              {filteredPosts.length === 0 ? (
-                <p className="feed-no-posts">
-                  {posts.length === 0
-                    ? 'No posts yet. Create one above.'
-                    : 'No posts in this category.'}
-                </p>
-              ) : (
-                filteredPosts.map((post) => (
-                  <article key={post.id} className="post-card">
-                    <div className="post-avatar">{authorDisplay(post.author)}</div>
-                    <div className="post-content">
-                      <div className="post-header">
-                        <span className="post-author">{post.author}</span>
-                        <span className="post-meta">
-                          {post.category ? post.category + ' · ' : ''}{timeAgo(post.createdAt)}
-                        </span>
-                      </div>
-                      <p className="post-text">{post.text}</p>
-                    </div>
-                  </article>
-                ))
-              )}
             </section>
           </div>
 
@@ -326,7 +197,9 @@ export function Feed() {
             <section className="sidebar-card">
               <h3>Upcoming Due</h3>
               {upcomingDue.length === 0 ? (
-                <p className="feed-upcoming-empty">No upcoming assignments. Add some in <Link to="/todo">To Do</Link>.</p>
+                <p className="feed-upcoming-empty">
+                  No upcoming assignments. Add some in <Link to="/todo">To Do</Link>.
+                </p>
               ) : (
                 <ul className="feed-upcoming-list">
                   {upcomingDue.map((a) => (
@@ -338,42 +211,6 @@ export function Feed() {
               )}
             </section>
 
-            <section className="sidebar-card feed-live-chat">
-              <h3>Live chat</h3>
-              <p className="feed-chat-meta">
-                {onlineCount} online ·{' '}
-                {chatStatus === 'live'
-                  ? 'Connected'
-                  : chatStatus === 'connecting'
-                    ? 'Connecting…'
-                    : 'Disconnected'}
-              </p>
-              <ul className="feed-chat-messages" aria-live="polite">
-                {chatMessages.length === 0 ? (
-                  <li className="feed-chat-empty">Open the feed in another window to chat together.</li>
-                ) : (
-                  chatMessages.map((m, i) => (
-                    <li key={`${m.ts}-${i}`}>
-                      <strong>{m.from}:</strong> {m.text}
-                    </li>
-                  ))
-                )}
-              </ul>
-              <form className="feed-chat-form" onSubmit={sendLiveChat}>
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  placeholder="Message…"
-                  maxLength={500}
-                  autoComplete="off"
-                />
-                <button type="submit" disabled={chatStatus !== 'live'}>
-                  Send
-                </button>
-              </form>
-            </section>
-
             <section className="sidebar-card">
               <h3>Suggested Resources</h3>
               <ul>
@@ -381,7 +218,9 @@ export function Feed() {
                   <a href="https://coderpad.io/regular-expression-cheat-sheet/">Regex cheat sheet</a>
                 </li>
                 <li>
-                  <a href="https://masteryls.com/course/1a8c01d0-5e9c-4a7c-8597-55bd5159967e/topic/6d489420-b320-4bc9-b43d-5c041a08b6bf">Git deploy checklist</a>
+                  <a href="https://masteryls.com/course/1a8c01d0-5e9c-4a7c-8597-55bd5159967e/topic/6d489420-b320-4bc9-b43d-5c041a08b6bf">
+                    Git deploy checklist
+                  </a>
                 </li>
               </ul>
             </section>

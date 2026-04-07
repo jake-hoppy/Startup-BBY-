@@ -207,14 +207,12 @@ button:hover {
 
 button:active { transform: translateY(0px); }
 
-.create-post-section button,
 form button[type="submit"],
 .actions-buttons button {
   background: linear-gradient(135deg, var(--accent), var(--accent-dark));
   border-color: rgba(6,182,212,.45);
 }
 
-.create-post-section button:hover,
 form button[type="submit"]:hover,
 .actions-buttons button:hover {
   filter: brightness(1.05);
@@ -259,8 +257,7 @@ label {
 
 .sidebar-card,
 .post-card,
-.create-post-section,
-.websocket-placeholder,
+.feed-main-live-chat,
 .todo-filters,
 .calendar-card,
 .welcome-section,
@@ -276,8 +273,7 @@ label {
 
 .sidebar-card h2,
 .sidebar-card h3,
-.create-post-section h2,
-.websocket-placeholder h2,
+.feed-main-live-chat h2,
 .todo-filters h2,
 .calendar-section h2,
 .welcome-section h2,
