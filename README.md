@@ -129,8 +129,8 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Backend listens for WebSocket connection** - I did not complete this part of the deliverable.
-- [ ] **Frontend makes WebSocket connection** - I did not complete this part of the deliverable.
-- [ ] **Data sent over WebSocket connection** - I did not complete this part of the deliverable.
-- [ ] **WebSocket data displayed** - I did not complete this part of the deliverable.
-- [ ] **Application is fully functional** - I did not complete this part of the deliverable.
+- [x] **Backend listens for WebSocket connection** - I updated the backend service to run Express through an HTTP server and attached a WebSocket server (ws) on /ws. The server authenticates each socket using the same login cookie token used by REST endpoints and rejects unauthenticated connections.
+- [x] **Frontend makes WebSocket connection** - The Feed page opens a WebSocket connection to the same host (ws:// in local dev, wss:// in production) and listens for live events. In development, Vite proxies /ws to the backend on port 4000 so the React app and service work together.
+- [x] **Data sent over WebSocket connection** - Clients send JSON chat messages (type, text, and category) to the server. The server validates/sanitizes the payload and broadcasts normalized chat events plus presence count updates (users online) to all connected clients.
+- [x] **WebSocket data displayed** - Incoming WebSocket data is rendered in the Feed UI in real time. Messages appear as post-style cards with author, category, and relative timestamp, and the UI also shows live connection status and online user count.
+- [x] **Application is fully functional** - The application now works as intended allowing users to chat over a text box while updating their schooling info and organizing what needs to get done.
