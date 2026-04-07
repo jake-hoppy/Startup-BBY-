@@ -235,6 +235,35 @@ apiRouter.post('/classes', verifyAuth, async (req, res) => {
   }
 });
 
+apiRouter.delete('/classes/:name', verifyAuth, async (req, res) => {
+  try {
+    let name;
+    try {
+      name = decodeURIComponent(req.params.name).trim();
+    } catch {
+      res.status(400).send({ msg: 'Invalid class name' });
+      return;
+    }
+    if (!name) {
+      res.status(400).send({ msg: 'Class name required' });
+      return;
+    }
+    const ownerEmail = req.user.email;
+    const col = getDb().collection('classes');
+    const del = await col.deleteOne({ ownerEmail, name });
+    if (del.deletedCount === 0) {
+      res.status(404).send({ msg: 'Class not found' });
+      return;
+    }
+    await getDb().collection('assignments').deleteMany({ ownerEmail, className: name });
+    const docs = await col.find({ ownerEmail }).project({ name: 1, _id: 0 }).toArray();
+    res.send(docs.map((c) => c.name));
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ msg: 'Server error' });
+  }
+});
+
 // ---- Assignments ----
 
 apiRouter.get('/assignments', verifyAuth, async (req, res) => {

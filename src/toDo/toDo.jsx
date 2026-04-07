@@ -84,6 +84,19 @@ export function ToDo() {
   // Filter state (All or a specific class)
   const [selectedClass, setSelectedClass] = useState('All');
 
+  async function handleDeleteClass(className) {
+    const ok = window.confirm(
+      `Delete "${className}" and all assignments for this class? This cannot be undone.`
+    );
+    if (!ok) return;
+    const res = await api(`/api/classes/${encodeURIComponent(className)}`, { method: 'DELETE' });
+    if (res.ok) {
+      setClasses(await res.json());
+      setAssignments((prev) => prev.filter((a) => a.className !== className));
+      if (selectedClass === className) setSelectedClass('All');
+    }
+  }
+
   // Tasks from backend API
   const [apiTasks, setApiTasks] = useState([]);
   const [taskTitle, setTaskTitle] = useState('');
@@ -256,14 +269,24 @@ export function ToDo() {
                 </button>
 
                 {classes.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setSelectedClass(c)}
-                    aria-pressed={selectedClass === c}
-                  >
-                    {c}
-                  </button>
+                  <div key={c} className="class-filter-pill">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedClass(c)}
+                      aria-pressed={selectedClass === c}
+                    >
+                      {c}
+                    </button>
+                    <button
+                      type="button"
+                      className="class-delete-button"
+                      aria-label={`Delete class ${c}`}
+                      title="Delete class"
+                      onClick={() => handleDeleteClass(c)}
+                    >
+                      ×
+                    </button>
+                  </div>
                 ))}
               </div>
             </section>
