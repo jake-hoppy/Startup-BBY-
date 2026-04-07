@@ -12,6 +12,8 @@ export function Feed() {
   const [studyTip, setStudyTip] = useState({ text: null, loading: true, error: null });
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
+  const [chatCategory, setChatCategory] = useState('');
+  const [chatFilter, setChatFilter] = useState('all');
   const [chatStatus, setChatStatus] = useState('offline');
   const [onlineCount, setOnlineCount] = useState(0);
   const chatWsRef = useRef(null);
@@ -77,6 +79,11 @@ export function Feed() {
       .slice(0, 5);
   }, [assignments]);
 
+  const filteredChatMessages = useMemo(() => {
+    if (chatFilter === 'all') return chatMessages;
+    return chatMessages.filter((m) => (m.category || 'post') === chatFilter);
+  }, [chatMessages, chatFilter]);
+
   async function handleLogout() {
     await logout();
     navigate('/login');
@@ -87,8 +94,37 @@ export function Feed() {
     const t = chatInput.trim();
     const ws = chatWsRef.current;
     if (!t || !ws || ws.readyState !== WebSocket.OPEN) return;
-    ws.send(JSON.stringify({ type: 'chat', text: t }));
+    const category = (chatCategory || 'post').toLowerCase();
+    ws.send(JSON.stringify({ type: 'chat', text: t, category }));
     setChatInput('');
+    setChatCategory('');
+  }
+
+  function authorDisplay(email) {
+    if (!email) return '?';
+    const part = String(email).split('@')[0];
+    return part.length > 2 ? part.slice(0, 2).toUpperCase() : part.toUpperCase();
+  }
+
+  function timeAgo(ts) {
+    const d = new Date(typeof ts === 'number' ? ts : ts);
+    const sec = (Date.now() - d.getTime()) / 1000;
+    if (sec < 60) return 'just now';
+    if (sec < 3600) return `${Math.floor(sec / 60)}m ago`;
+    if (sec < 86400) return `${Math.floor(sec / 3600)}h ago`;
+    if (sec < 604800) return `${Math.floor(sec / 86400)}d ago`;
+    return d.toLocaleDateString();
+  }
+
+  function categoryLabel(cat) {
+    const c = cat || 'post';
+    const labels = {
+      question: 'Question',
+      accomplishment: 'Accomplishment',
+      resource: 'Resource',
+      post: 'Post',
+    };
+    return labels[c] || 'Post';
   }
 
   return (
@@ -148,21 +184,9 @@ export function Feed() {
                       : 'Disconnected'}
                 </p>
               </div>
-              <ul className="feed-chat-messages" aria-live="polite">
-                {chatMessages.length === 0 ? (
-                  <li className="feed-chat-empty">
-                    No messages yet. Open this feed in another window (or ask a classmate to join) to chat
-                    in real time.
-                  </li>
-                ) : (
-                  chatMessages.map((m, i) => (
-                    <li key={`${m.ts}-${i}`}>
-                      <strong>{m.from}:</strong> {m.text}
-                    </li>
-                  ))
-                )}
-              </ul>
-              <form className="feed-chat-form" onSubmit={sendLiveChat}>
+
+              <form className="feed-chat-composer post-card" onSubmit={sendLiveChat}>
+                <h3 className="feed-chat-composer-title">Post to live feed</h3>
                 <textarea
                   placeholder="Share a study question, accomplishment, or resource…"
                   rows={4}
@@ -171,13 +195,92 @@ export function Feed() {
                   maxLength={500}
                   autoComplete="off"
                 />
-                <div className="feed-chat-form-actions">
-                  <span className="feed-chat-char-hint">{chatInput.length}/500</span>
-                  <button type="submit" disabled={chatStatus !== 'live' || !chatInput.trim()}>
-                    Send to feed
-                  </button>
+                <div className="feed-chat-composer-row">
+                  <select
+                    value={chatCategory}
+                    onChange={(e) => setChatCategory(e.target.value)}
+                    aria-label="Post category"
+                  >
+                    <option value="">Select category</option>
+                    <option value="question">Question</option>
+                    <option value="accomplishment">Accomplishment</option>
+                    <option value="resource">Resource</option>
+                    <option value="post">General post</option>
+                  </select>
+                  <div className="feed-chat-form-actions">
+                    <span className="feed-chat-char-hint">{chatInput.length}/500</span>
+                    <button type="submit" disabled={chatStatus !== 'live' || !chatInput.trim()}>
+                      Send to feed
+                    </button>
+                  </div>
                 </div>
               </form>
+
+              <div className="feed-chat-stream-wrap">
+                <h3 className="feed-chat-stream-title">Browse by category</h3>
+                <section className="feed-filters" aria-label="Filter messages by category">
+                  <button
+                    type="button"
+                    onClick={() => setChatFilter('all')}
+                    aria-pressed={chatFilter === 'all'}
+                  >
+                    All
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setChatFilter('question')}
+                    aria-pressed={chatFilter === 'question'}
+                  >
+                    Questions
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setChatFilter('accomplishment')}
+                    aria-pressed={chatFilter === 'accomplishment'}
+                  >
+                    Accomplishments
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setChatFilter('resource')}
+                    aria-pressed={chatFilter === 'resource'}
+                  >
+                    Resources
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setChatFilter('post')}
+                    aria-pressed={chatFilter === 'post'}
+                  >
+                    General
+                  </button>
+                </section>
+
+                <div className="feed-chat-stream" role="feed" aria-live="polite" aria-busy={chatStatus === 'connecting'}>
+                  {chatMessages.length === 0 ? (
+                    <p className="feed-chat-empty">
+                      No messages yet. Open this feed in another window or invite a classmate to chat in real time.
+                    </p>
+                  ) : filteredChatMessages.length === 0 ? (
+                    <p className="feed-chat-empty">Nothing in this category yet. Try another filter.</p>
+                  ) : (
+                    filteredChatMessages.map((m, i) => (
+                      <article key={`${m.ts}-${i}`} className="post-card feed-chat-card">
+                        <div className="post-avatar">{authorDisplay(m.email)}</div>
+                        <div className="post-content">
+                          <div className="post-header">
+                            <span className="post-author">{m.from}</span>
+                            <span className="post-meta">
+                              {categoryLabel(m.category)} · {timeAgo(m.ts)}
+                            </span>
+                          </div>
+                          <p className="post-text">{m.text}</p>
+                        </div>
+                      </article>
+                    ))
+                  )}
+                </div>
+              </div>
             </section>
           </div>
 

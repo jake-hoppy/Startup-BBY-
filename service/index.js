@@ -435,11 +435,15 @@ wss.on('connection', async (ws, req) => {
     if (msg.type !== 'chat' || typeof msg.text !== 'string') return;
     const text = String(msg.text).trim().slice(0, 500);
     if (!text) return;
+    const allowedCategories = new Set(['question', 'accomplishment', 'resource', 'post']);
+    let category = typeof msg.category === 'string' ? String(msg.category).trim().toLowerCase() : 'post';
+    if (!allowedCategories.has(category)) category = 'post';
     broadcastWs({
       type: 'chat',
       from: ws.user.username,
       email: ws.user.email,
       text,
+      category,
       ts: Date.now(),
     });
   });
