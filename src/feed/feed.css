@@ -294,3 +294,16 @@
 .feed-upcoming-empty a {
   color: var(--accent);
 }
+
+@media (max-width: 900px) {
+  .feed-main-live-chat {
+    min-height: 0;
+  }
+
+  .feed-chat-stream {
+    min-height: 0;
+    max-height: none;
+    overflow-y: visible;
+    padding-right: 0;
+  }
+}
