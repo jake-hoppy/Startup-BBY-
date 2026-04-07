@@ -98,6 +98,15 @@ export function Feed() {
     navigate('/login');
   }
 
+  function sendLiveChat(e) {
+    e.preventDefault();
+    const t = chatInput.trim();
+    const ws = chatWsRef.current;
+    if (!t || !ws || ws.readyState !== WebSocket.OPEN) return;
+    ws.send(JSON.stringify({ type: 'chat', text: t }));
+    setChatInput('');
+  }
+
   async function handleCreatePost(e) {
     e.preventDefault();
     const trimmed = postText.trim();
@@ -329,11 +338,40 @@ export function Feed() {
               )}
             </section>
 
-            <section className="sidebar-card">
-              <h3>Study Buddies Online</h3>
-              <ul>
-                no one online
+            <section className="sidebar-card feed-live-chat">
+              <h3>Live chat</h3>
+              <p className="feed-chat-meta">
+                {onlineCount} online ·{' '}
+                {chatStatus === 'live'
+                  ? 'Connected'
+                  : chatStatus === 'connecting'
+                    ? 'Connecting…'
+                    : 'Disconnected'}
+              </p>
+              <ul className="feed-chat-messages" aria-live="polite">
+                {chatMessages.length === 0 ? (
+                  <li className="feed-chat-empty">Open the feed in another window to chat together.</li>
+                ) : (
+                  chatMessages.map((m, i) => (
+                    <li key={`${m.ts}-${i}`}>
+                      <strong>{m.from}:</strong> {m.text}
+                    </li>
+                  ))
+                )}
               </ul>
+              <form className="feed-chat-form" onSubmit={sendLiveChat}>
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="Message…"
+                  maxLength={500}
+                  autoComplete="off"
+                />
+                <button type="submit" disabled={chatStatus !== 'live'}>
+                  Send
+                </button>
+              </form>
             </section>
 
             <section className="sidebar-card">
