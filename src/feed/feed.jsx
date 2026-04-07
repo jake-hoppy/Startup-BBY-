@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../api';
@@ -14,6 +14,11 @@ export function Feed() {
   const [assignments, setAssignments] = useState([]);
   const [filter, setFilter] = useState('all');
   const [studyTip, setStudyTip] = useState({ text: null, loading: true, error: null });
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatStatus, setChatStatus] = useState('offline');
+  const [onlineCount, setOnlineCount] = useState(0);
+  const chatWsRef = useRef(null);
 
   useEffect(() => {
     api('/api/posts')
