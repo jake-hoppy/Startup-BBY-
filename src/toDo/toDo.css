@@ -147,6 +147,17 @@
   gap: 12px;
 }
 
+.upcoming-main-section {
+  margin-top: 12px;
+  min-height: 280px;
+}
+
+.upcoming-main-section .upcoming-list {
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
 .upcoming-list {
   list-style: none;
   padding-left: 0;
@@ -160,6 +171,14 @@
   background: rgba(0,0,0,.14);
   margin-bottom: 10px;
   color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .upcoming-main-section .upcoming-list {
+    max-height: none;
+    overflow-y: visible;
+    padding-right: 0;
+  }
 }
 
 /* Modal styles live in app.css (shared with login Create Account modal) */

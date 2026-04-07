@@ -89,11 +89,24 @@ export function ToDo() {
       `Delete "${className}" and all assignments for this class? This cannot be undone.`
     );
     if (!ok) return;
-    const res = await api(`/api/classes/${encodeURIComponent(className)}`, { method: 'DELETE' });
-    if (res.ok) {
+    try {
+      const res = await api(`/api/classes/${encodeURIComponent(className)}`, { method: 'DELETE' });
+      if (!res.ok) {
+        let msg = `Could not delete class (HTTP ${res.status}).`; 
+        try {
+          const body = await res.json();
+          if (body?.msg) msg = body.msg;
+        } catch {
+          // keep fallback message
+        }
+        window.alert(msg);
+        return;
+      }
       setClasses(await res.json());
       setAssignments((prev) => prev.filter((a) => a.className !== className));
       if (selectedClass === className) setSelectedClass('All');
+    } catch {
+      window.alert('Network error while deleting class.');
     }
   }
 
@@ -364,6 +377,24 @@ export function ToDo() {
                 </div>
               </div>
             </section>
+
+            <section className="sidebar-card upcoming-main-section">
+              <h2>Upcoming Assignments</h2>
+
+              <ul className="upcoming-list">
+                {filteredAssignmentsSorted.map((a) => (
+                  <li key={a.id}>
+                    <strong>{a.className}:</strong> {a.name} - {a.dueDate}
+                  </li>
+                ))}
+
+                {filteredAssignmentsSorted.length === 0 && (
+                  <li style={{ opacity: 0.7 }}>
+                    No assignments{selectedClass === 'All' ? '' : ` for ${selectedClass}`} yet.
+                  </li>
+                )}
+              </ul>
+            </section>
           </section>
 
           <aside className="todo-sidebar">
@@ -435,23 +466,6 @@ export function ToDo() {
               </button>
             </section>
 
-            <section className="sidebar-card">
-              <h2>Upcoming Assignments</h2>
-
-              <ul className="upcoming-list">
-                {filteredAssignmentsSorted.map((a) => (
-                  <li key={a.id}>
-                    <strong>{a.className}:</strong> {a.name} – {a.dueDate}
-                  </li>
-                ))}
-
-                {filteredAssignmentsSorted.length === 0 && (
-                  <li style={{ opacity: 0.7 }}>
-                    No assignments{selectedClass === 'All' ? '' : ` for ${selectedClass}`} yet.
-                  </li>
-                )}
-              </ul>
-            </section>
           </aside>
         </div>
       </main>
