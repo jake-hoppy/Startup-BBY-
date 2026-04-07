@@ -400,6 +400,13 @@ function getTokenFromCookieHeader(header) {
   return m ? decodeURIComponent(m[1].trim()) : null;
 }
 
+function broadcastWs(data) {
+  const s = JSON.stringify(data);
+  for (const c of wss.clients) {
+    if (c.readyState === WebSocket.OPEN) c.send(s);
+  }
+}
+
 wss.on('connection', async (ws, req) => {
   const token = getTokenFromCookieHeader(req.headers.cookie);
   const chatUser = token ? await findUserByToken(token) : null;
