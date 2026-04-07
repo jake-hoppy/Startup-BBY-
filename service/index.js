@@ -423,6 +423,7 @@ wss.on('connection', async (ws, req) => {
     return;
   }
   ws.user = { username: chatUser.username, email: chatUser.email };
+  broadcastWs({ type: 'presence', count: wsAuthenticatedCount() });
 
   ws.on('message', (raw) => {
     let msg;
@@ -441,6 +442,10 @@ wss.on('connection', async (ws, req) => {
       text,
       ts: Date.now(),
     });
+  });
+
+  ws.on('close', () => {
+    broadcastWs({ type: 'presence', count: wsAuthenticatedCount() });
   });
 });
 
