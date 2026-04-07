@@ -415,6 +415,25 @@ wss.on('connection', async (ws, req) => {
     return;
   }
   ws.user = { username: chatUser.username, email: chatUser.email };
+
+  ws.on('message', (raw) => {
+    let msg;
+    try {
+      msg = JSON.parse(String(raw));
+    } catch {
+      return;
+    }
+    if (msg.type !== 'chat' || typeof msg.text !== 'string') return;
+    const text = String(msg.text).trim().slice(0, 500);
+    if (!text) return;
+    broadcastWs({
+      type: 'chat',
+      from: ws.user.username,
+      email: ws.user.email,
+      text,
+      ts: Date.now(),
+    });
+  });
 });
 
 async function start() {
