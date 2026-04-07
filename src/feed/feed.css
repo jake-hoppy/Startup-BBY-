@@ -8,9 +8,12 @@
 }
 
 .feed-main-header {
-  margin-bottom: 14px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 16px;
+  padding: 26px 28px 24px;
+  border-radius: 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 }
 
 .feed-main-header-row {
@@ -18,7 +21,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 10px 14px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .feed-main-header h1 {
