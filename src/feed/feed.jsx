@@ -125,10 +125,14 @@ export function Feed() {
         <div className="feed-layout">
           <div className="feed-main">
             <header className="feed-main-header">
-              <h1>Feed</h1>
+              <div className="feed-main-header-row">
+                <h1>Feed</h1>
+                <span className="feed-live-pill" aria-hidden="true">
+                  Live
+                </span>
+              </div>
               <p className="feed-page-lead">
-                Live study chat — share questions, wins, and resources. Messages show up instantly for
-                everyone on this page.
+                Chat in real time with everyone on this page—questions, wins, and study resources.
               </p>
             </header>
 
