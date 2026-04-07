@@ -53,6 +53,34 @@ export function Feed() {
       });
   }, []);
 
+  useEffect(() => {
+    if (!user?.email) return undefined;
+    setChatMessages([]);
+    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${proto}//${window.location.host}/ws`);
+    chatWsRef.current = ws;
+    setChatStatus('connecting');
+    ws.onopen = () => setChatStatus('live');
+    ws.onclose = () => {
+      chatWsRef.current = null;
+      setChatStatus('offline');
+    };
+    ws.onerror = () => setChatStatus('error');
+    ws.onmessage = (ev) => {
+      try {
+        const d = JSON.parse(ev.data);
+        if (d.type === 'presence' && typeof d.count === 'number') setOnlineCount(d.count);
+        if (d.type === 'chat') setChatMessages((prev) => [...prev, d]);
+      } catch {
+        /* ignore */
+      }
+    };
+    return () => {
+      chatWsRef.current = null;
+      ws.close();
+    };
+  }, [user?.email]);
+
   const filteredPosts = useMemo(() => {
     if (filter === 'all') return posts;
     return posts.filter((p) => p.category === filter);
